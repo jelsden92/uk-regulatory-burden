@@ -9,6 +9,9 @@ author: Jethro Elsden
 # research/methodology landing page. README.md is rendered as the index.
 theme: jekyll-theme-cayman
 
+# Hide the theme's "View on GitHub / Download .zip / Download .tar.gz" buttons.
+show_downloads: false
+
 # Exclude files that should not appear on the published site.
 exclude:
   - LICENSE

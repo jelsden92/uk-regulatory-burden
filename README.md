@@ -1,5 +1,3 @@
-# UK Regulatory Burden
-
 **The first comprehensive measure of prescriptive regulatory burden in UK legislation — a UK equivalent of [QuantGov RegData](https://quantgov.org/).**
 
 This repository contains the corpus-building pipeline, classification code, and methodology documents for a project that measures the stock and flow of legally binding obligations across the entire body of UK law in force. Results are forthcoming in a separate think-tank publication.
