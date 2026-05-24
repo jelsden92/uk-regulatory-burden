@@ -125,24 +125,9 @@ Ground truth validation uses a structured Excel workbook (Reg_Burden_Project_Val
 - Un-commenced provisions: Status filtering now correctly excludes these — Guard Dogs Act s.2 paradigm case
 - Christmas Day Trading Act: employment provisions inserted into ERA 1996 — obligations counted there not in the 2004 Act
 
-# 8. Benchmark — Current Baselines
+# 8. Benchmark Validation
 
-| Act | PA excl | IB | IBA |
-| --- | --- | --- | --- |
-| Financial Services and Markets Act 2000 | 397 | 1 | 0 |
-| Employment Rights Act 1996 | 278 | 6 | 1 |
-| Equality Act 2010 | 149 | 9 | 1 |
-| Special School Residential Services (Wales) Regs 2024 | 144 | 0 | 0 |
-| UK GDPR | 126 | 5 | 0 |
-| Land Reform (Scotland) Act 2003 | 98 | 1 | 0 |
-| Northern Ireland Act 1998 | 91 | 1 | 0 |
-| Health and Safety at Work etc. Act 1974 | 56 | 0 | 0 |
-| Competition Act 1998 | 40 | 0 | 0 |
-| Environmental Permitting (E&W) Regulations 2016 | 14 | 1 | 0 |
-| Explosives Act 1875 | 8 | 1 | 0 |
-| Bribery Act 2010 | 6 | 2 | 1 |
-| Occupiers Liability Act 1957 | 4 | 0 | 0 |
-| Total | 1,411 | — | — |
+The methodology has been validated against a 13-act core benchmark suite spanning diverse legislative categories — criminal law, employment, financial services, environmental regulation, consumer protection, and devolved legislation. Benchmark counts are not published here ahead of the forthcoming think tank paper.
 
 # 9. Known Limitations
 - Sub-clause overcounting: primary solution is classifier — not addressable by pattern matching without regression risk
