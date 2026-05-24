@@ -25,7 +25,12 @@ Existing UK regulatory-burden estimates count pages, words, or statutory instrum
 
 Key methodological features:
 
-- **Six-category classification** — `private_actor`, `implied_burden`, `implied_burden_active`, `conditional_obligation`, `public_body`, `ambiguous`. Headline metric is private-actor obligations.
+- **Classification system** — the headline metric is **total private actor burden**, defined as `direct + implied + conditional obligations` combined and presented as a breakdown:
+  - **Direct:** `private_actor` (standing obligations on non-governmental parties)
+  - **Implied:** `implied_burden`, `implied_burden_active` (defence provisions revealing standing compliance obligations)
+  - **Conditional:** `conditional_obligation`, `conditional_burden` (obligations triggered by regulatory action or anti-avoidance/purpose-based constraints)
+
+  `public_body` obligations are excluded; `ambiguous` sentences are flagged for review.
 - **Status filtering** — provisions marked Prospective, Repealed, Dead, or Discarded in the CLML XML are stripped before analysis, so the measure reflects law currently in force.
 - **Penalty-as-consequence rule** — criminal-enforcement provisions are not double-counted as separate obligations.
 - **Conditional obligations** — obligations triggered by regulatory action (improvement notices, licensing conditions, inspection powers) are captured as a distinct category, an area QuantGov does not address.

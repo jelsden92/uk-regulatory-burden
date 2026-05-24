@@ -9,17 +9,19 @@ This project creates the first comprehensive measure of the stock and flow of re
 
 > Key contribution: First systematic, independently verifiable measure of prescriptive regulatory burden in UK legislation. Covers 212,183 pieces of legislation — 99.6%+ of modern SIs, 100% of significant post-1990 primary legislation. Six-way classification system. Validated against manually derived ground truth across 40+ Acts.
 
-# 2. Classification System — Six Categories
+# 2. Classification System
 
-| Classification | Description | Treatment |
-| --- | --- | --- |
-| private_actor | Direct standing obligations on any non-governmental party | HEADLINE METRIC |
-| implied_burden | Obligations expressed as defences ('it is a defence to prove/show') | REPORTED SEPARATELY |
-| implied_burden_active | Implied burden requiring active compliance programme ('adequate procedures') | REPORTED SEPARATELY |
-| conditional_obligation | Obligations that activate only when a specific triggering event occurs — regulatory notice, licence grant, court order, regulatory inspection | REPORTED SEPARATELY |
-| conditional_burden | Anti-avoidance provisions and purpose-based constraints | REPORTED SEPARATELY |
-| public_body | Obligations on government ministers, regulators, courts, statutory bodies | EXCLUDED |
-| ambiguous | Subject cannot be reliably determined — flagged for review | FLAGGED |
+**Headline metric: total private actor burden = direct + implied + conditional obligations combined.** The three groups capture economically distinct compliance costs that all fall on non-governmental actors; they are presented as a breakdown of the headline total rather than as separate metrics. Public body obligations are excluded; ambiguous sentences are flagged for review.
+
+| Group | Classification | Description | Role in headline |
+| --- | --- | --- | --- |
+| **Direct** | private_actor | Direct standing obligations on any non-governmental party | Part of headline total |
+| **Implied** | implied_burden | Obligations expressed as defences ('it is a defence to prove/show') | Part of headline total |
+| **Implied** | implied_burden_active | Implied burden requiring active compliance programme ('adequate procedures') | Part of headline total |
+| **Conditional** | conditional_obligation | Obligations that activate only when a specific triggering event occurs — regulatory notice, licence grant, court order, regulatory inspection | Part of headline total |
+| **Conditional** | conditional_burden | Anti-avoidance provisions and purpose-based constraints | Part of headline total |
+| — | public_body | Obligations on government ministers, regulators, courts, statutory bodies | EXCLUDED |
+| — | ambiguous | Subject cannot be reliably determined — flagged for review | FLAGGED |
 
 > CONDITIONAL OBLIGATION: Obligations that only activate when a specific triggering event occurs are classified as conditional_obligation. This includes: (1) regulatory enforcement actions — improvement notices, enforcement notices, remedial orders; (2) licensing conditions — obligations activated when a licence is granted; (3) regulatory inspection/seizure powers — private actors face a conditional burden of submission when a regulator suspects non-compliance, even without a finding of guilt. These represent genuine but contingent compliance costs, economically distinct from standing obligations.
 
