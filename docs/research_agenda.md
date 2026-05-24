@@ -37,17 +37,7 @@ _May 2026  |  Version 9 — Corpus complete; classifier development next_
 # PART 3 — Validation Roadmap
 ## Short Act Manual Validation (current phase)
 
-| Act | Status | Count |
-| --- | --- | --- |
-| ELCI Act 1969 | Complete | 4 (1D+2I+1C) |
-| Guard Dogs Act 1975 | Complete | 6 (5D+1C) |
-| Late Payment Act 1998 | Complete | 9 (8D+1A) |
-| Noise Act 1996 | Complete | 1 (1C) |
-| Dangerous Dogs Act 1991 | Complete | 6 (5D+1C) |
-| Christmas Day Trading 2004 | Complete | 2 (2D) |
-| Wild Mammals Protection 1996 | Complete | 5 (1D+2I+2C) |
-| Theft Act 1978 | Complete | 1 (1D) |
-| Corporate Manslaughter 2007 | Complete | 3 (1D+2C) |
+Manual ground-truth validation has been completed for a short-Act sample spanning insurance, dangerous-animal law, criminal law, commercial debt, environmental protection, employment, and corporate liability. The sample covers the four sub-categories of private-actor burden (direct, implied, conditional obligation, conditional burden) and is used as paradigm cases for classifier development. Per-Act counts are not published here ahead of the forthcoming think tank paper.
 
 ## Next 12 Short Acts for Manual Review
 

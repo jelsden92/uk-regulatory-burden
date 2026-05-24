@@ -98,23 +98,14 @@ After subject classification, sentences are checked for conditional trigger phra
 
 > COVERAGE STATEMENT: The corpus covers 212,183 pieces of legislation — 99.6%+ of modern SIs, 100% of significant post-1990 primary legislation, and approximately 85-90% of all in-force legislation available as machine-readable XML on legislation.gov.uk. The remaining gap consists of local and private Acts structurally excluded from the National Archives API and pre-1948 legislation never digitised.
 
-# 7. Validation Results — 40+ Act Sample
+# 7. Validation Approach
+
 ## 7.1 Manual Validation Workbook
 Ground truth validation uses a structured Excel workbook (Reg_Burden_Project_Validation.xlsx) with columns: Act name, type, URL, burden sentence, section reference, Direct Burden, Implied Burden, Conditional Burden, Ambiguous, Claude agrees, Resolution. Each provision is classified manually and compared against analyser output sentence by sentence.
 
-## 7.2 Short Act Validation Results
+## 7.2 Short Act Validation Sample
 
-| Act | Manual count | Breakdown | Key finding |
-| --- | --- | --- | --- |
-| ELCI Act 1969 | 4 | 1 direct + 2 implied + 1 conditional | Insurance obligation + certificate display/production |
-| Guard Dogs Act 1975 | 6 | 5 direct + 1 conditional | s.2 un-commenced — Status filtering now excludes correctly |
-| Late Payment Act 1998 | 8 direct + 1 ambiguous | 8 direct | UCTA extensions as direct burdens; judicial discretion excluded |
-| Noise Act 1996 | 1 conditional | 1 conditional | s.8 conditional on warning notice — paradigm case |
-| Dangerous Dogs Act 1991 | 5 direct + 1 conditional | 5 prohibitions + s.3 conditional | s.3 out of control = conditional on dog's behaviour |
-| Christmas Day Trading 2004 | 2 direct | 2 direct | Employment provisions in ERA 1996 not in Act itself |
-| Wild Mammals Protection 1996 | 1 direct + 2 implied + 2 conditional | s.1 offence + s.2 defences + s.4 constable powers | Constable seizure = conditional burden on private actor |
-| Theft Act 1978 | 1 direct | s.3 making off without payment | ss.1-2 repealed by Fraud Act 2006 — Status filtering critical |
-| Corporate Manslaughter 2007 | 1 direct + 2 conditional | s.1 offence + s.9 remedial + s.10 publicity | Evidence supply = part of parent obligation not separate burden |
+Manual ground-truth validation has been completed for a short-Act sample spanning insurance, dangerous-animal law, criminal law, commercial debt, environmental protection, employment, and corporate liability. The sample covers the four sub-categories of private-actor burden (direct, implied, conditional obligation, conditional burden), provides paradigm cases for each, and stress-tests the penalty-as-consequence, evidence-supply, and Status-filter rules against historical Acts. Per-Act validation counts are not published here ahead of the forthcoming think tank paper.
 
 ## 7.3 Key Methodological Findings from Short Act Validation
 - Penalty-as-consequence: criminal enforcement provisions correctly excluded once the underlying obligation is counted
