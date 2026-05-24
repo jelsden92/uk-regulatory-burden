@@ -153,4 +153,4 @@ A formal working-paper citation will be added when the results paper is publishe
 
 ## Contact
 
-Jethro Elsden — jethro.elsden@tyistrategy.co.uk
+Jethro Elsden — jelsden1000@gmail.com
