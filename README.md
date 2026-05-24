@@ -12,7 +12,7 @@ This repository contains the corpus-building pipeline, classification code, and 
 | --- | --- |
 | Corpus build | **Complete** — 212,183 items, covering 99.6%+ of modern statutory instruments and 100% of significant post-1990 primary legislation |
 | Methodology | **Stable at v12** — six-category classification system; ground-truth validation against 10+ Acts on a line-by-line manual workbook |
-| Classifier | Hybrid rule-based and NLP pipeline with six-category classification, validated against manual ground-truth across 10+ Acts using line-by-line review |
+| Classifier | Under development — hybrid rule-based and NLP pipeline with six-category classification, validated against manual ground-truth across 10+ Acts using line-by-line review |
 | Results | **Forthcoming** in a separate think-tank paper |
 
 The corpus manifest (`corpus_manifest.csv`) lists every item in the dataset by its `legislation.gov.uk` URL, title, year, and legislation type. The underlying XML text of each item is not redistributed here — it is sourced from [legislation.gov.uk](https://www.legislation.gov.uk) under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
