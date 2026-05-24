@@ -27,7 +27,7 @@ Key methodological features:
 
 - **Classification system** — the headline metric is **total private actor burden**, defined as `direct + implied + conditional obligations` combined and presented as a breakdown:
   - **Direct burdens** — obligations that apply at all times regardless of whether any regulatory action has been taken (example: an employer must pay the national minimum wage).
-  - **Implied burdens** — obligations revealed through defence provisions; a business can only avoid liability by proving it maintained adequate systems, creating a standing compliance obligation expressed as a defence rather than a direct requirement (example: the Bribery Act adequate procedures defence).
+  - **Implied burdens** — obligations not directly stated as requirements but revealed through the structure of the law. This includes defence provisions where a business must prove it maintained adequate systems; rights granted to one party that create corresponding obligations on another; and provisions voiding contract terms unless certain conditions are met.
   - **Conditional burdens** — obligations that activate when a specific event occurs, typically regulatory action such as an inspection, improvement notice, or licence condition (example: a landlord must comply with an improvement notice once served).
 
   `public_body` obligations are excluded; `ambiguous` sentences are flagged for review.
