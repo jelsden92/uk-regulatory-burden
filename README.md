@@ -124,7 +124,7 @@ This downloads and analyses a configurable list of Acts into `test_run.db` and p
 
 ### 3. Run the full classifier
 
-The full corpus run is performed on Google Colab with `en_core_web_trf` + GPU. The notebook is not included in this repository.
+The full corpus run is performed on Google Colab with `en_core_web_trf` + GPU. The notebook is not included in this repository, available on request.
 
 ### Dependencies
 
