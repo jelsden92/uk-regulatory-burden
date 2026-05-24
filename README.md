@@ -21,6 +21,8 @@ The corpus manifest (`corpus_manifest.csv`) lists every item in the dataset by i
 
 ## Why this matters
 
+No government, regulator, or researcher currently has a reliable answer to the question: how much regulation exists in the UK, and is it growing or shrinking? This project provides that answer for the first time.
+
 Existing UK regulatory-burden estimates count pages, words, or statutory instruments — proxies that conflate prescriptive content with definitional text, repealed provisions, and devolved-government plumbing. This project counts **standing obligations on private actors**: the specific provisions that impose compliance costs on businesses, individuals, and the third sector.
 
 Key methodological features:
