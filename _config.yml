@@ -1,0 +1,31 @@
+title: UK Regulatory Burden
+description: >-
+  The first comprehensive measure of prescriptive regulatory burden in UK
+  legislation — a UK equivalent of QuantGov RegData. Corpus complete at
+  212,183 items; methodology validated; results forthcoming.
+author: Jethro Elsden
+
+# Project Pages theme — clean, professional, mobile-friendly, suitable for a
+# research/methodology landing page. README.md is rendered as the index.
+theme: jekyll-theme-cayman
+
+# Exclude files that should not appear on the published site.
+exclude:
+  - LICENSE
+  - LICENSE-docs
+  - .gitignore
+  - corpus_manifest.csv
+  - "*.py"
+  - "*.docx"
+  - "*.db"
+  - "Bulk download/"
+
+# Use the GitHub-rendered Markdown processor.
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+# Show the source-of-truth link in footer.
+github:
+  is_project_page: true

@@ -1,0 +1,77 @@
+# --- Databases (large + derived from public data) ---
+legislation.db
+test_run.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# --- Bulk downloads & redistributables ---
+*.xml
+*.zip
+Bulk download/
+InForce_results_47/
+
+# --- Validation workbook (private working artefact) ---
+Reg Burden Project Validation.xlsx
+Reg_Burden_Project_Validation.xlsx
+
+# --- Downloaded-data CSVs (not the corpus manifest) ---
+# Keep corpus_manifest.csv tracked; ignore all other CSVs that are
+# either raw API gap-lists or run outputs.
+missing_*.csv
+*_priority.csv
+*_results.csv
+
+# --- Logs ---
+*.log
+missing_si_run.log
+missing_si_retry.log
+bulk_errors.log
+bulk_load.log
+download.log
+analysis.log
+errors.log
+rate_limit.log
+remaining_queues_run.log
+remaining_queues_run2.log
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# --- Editor / OS / tooling state ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.claude/
+
+# --- Project-specific scratch (private helper scripts not for publication) ---
+_*.py
+check_*.py
+clear_*.py
+cma_query.py
+ucta_query.py
+reanalyse_*.py
+regression_*.py
+run_remaining_queues.py
+create_notebook.py
+
+# --- Email correspondence ---
+*.eml
+Fwd_*.zip
+
+# --- Other ---
+list-of-uk-regulatory-organisations.ods
+duties.zip
+uk_reg_colab_v*.ipynb
+uk_reg_*.docx
