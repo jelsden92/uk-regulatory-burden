@@ -110,7 +110,4 @@ Reg_Burden_Project_Validation.xlsx — 9 Acts complete with full line-by-line cl
 - Adapt word lists for jurisdiction-specific drafting conventions
 - EU legislative drafting uses 'are prohibited', 'is prohibited' — already in word list
 
-# Opening Prompt for New Claude Chat Session
-UK Regulatory Burden project. Key context: (1) Corpus complete — legislation.db has 212,183 rows, 99.6%+ SI coverage, Status filtering active stripping Repealed/Prospective provisions; (2) 13-act benchmark stable at 1,411 total PA; (3) Manual validation workbook has 9 Acts complete; (4) Next 12 short Acts queued for manual review; (5) Classifier development starts after 20 Acts validated. Current priorities: (a) continue manual validation of short Acts; (b) read Victorian Acts for ground truth analysis; (c) sync Colab notebook to v5 with all recent fixes before full run.
-
 *Version 13 — May 2026. Corpus complete 212,183 rows. Six-category classification. Status filtering. Short act workbook. Replication guide. Classifier development next.*
