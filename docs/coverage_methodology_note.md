@@ -1,9 +1,17 @@
 # Coverage methodology note
 
-**Headline figure:** 119,841 unique pieces of UK legislation in force (National Archives InForce CSV manifests).
-**Digitised statute book (items with substantive XML on legislation.gov.uk):** **69,077.**
-**In our corpus with substantive text:** **69,077 — 100 % retrieval of the digitised statute book.**
-**Confirmed in-force corpus (rows with `na_inforce = 1` in `legislation.db`):** **84,565** (includes 15,488 metadata-only shells retained for amendment-chain tracking; the analyser filters on `length(full_text) >= 200`).
+**Headline corpus figure: 69,077 fully digitised pieces of in-force UK legislation** — 100 % of the items that legislation.gov.uk currently exposes with substantive machine-readable XML body content (`NumberOfProvisions > 0`, `full_text >= 200` chars). This is the analyser input.
+
+Within a wider National Archives in-force universe of **119,841 catalogued items**, the 50,764-item difference is structural:
+
+| Tier | Description | Items |
+| --- | --- | ---: |
+| **Tier 1 — Fully digitised (HEADLINE)** | Substantive machine-readable XML; in corpus and analyser-ready | **69,077** |
+| Tier 2 — Retrieved metadata-only shells | `/data.xml` 200 + `NumberOfProvisions = 0`; row in DB but PDF-only | 15,488 |
+| Tier 3 — Not digitised at all | `/data.xml` returns HTTP 404; catalogued but no record on legislation.gov.uk | 35,276 |
+| **In-force universe (catalogued)** | National Archives InForce CSV manifests | **119,841** |
+
+`legislation.db` total rows: 217,296. Rows flagged `na_inforce = 1` (= Tier 1 + Tier 2): 84,565. The analyser filters on `length(full_text) >= 200` to isolate Tier 1; Tier 2 rows are retained in the database for amendment-chain tracking but do not enter the analyser.
 
 ## Definitional rule (in force)
 
