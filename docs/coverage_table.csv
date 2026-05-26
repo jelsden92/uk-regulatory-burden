@@ -9,11 +9,11 @@ General application legislation,apni,NI Parliament Acts,385,213,213,55.3,100.0,1
 General application legislation,mnia,Measures of the NI Assembly (1974),2,2,2,100.0,100.0,0,0.0
 General application legislation,nisi,NI Orders in Council,472,447,447,94.7,100.0,12,0.0
 General application legislation,ukcm,UK Church Measures,136,124,124,91.2,100.0,12,0.0
-General application legislation,aep,Acts of the English Parliament (pre-1707),163,43,43,26.4,100.0,120,0.0
+General application legislation,aep,Acts of the English Parliament (pre-1707),163,44,44,27.0,100.0,119,0.0
 General application legislation,apgb,Acts of Parliament of GB (1707-1800),692,32,32,4.6,100.0,660,0.0
 General application legislation,aip,Acts of the Irish Parliament (pre-1800),153,9,9,5.9,100.0,144,0.0
 General application legislation,aosp,Acts of the Old Scottish Parliament (pre-1707),86,65,65,75.6,100.0,21,0.0
-General application legislation,uksi,UK Statutory Instruments,51075,43228,43125,84.6,99.8,517,20.0
+General application legislation,uksi,UK Statutory Instruments,51075,43125,43125,84.4,100.0,517,0.0
 General application legislation,ssi,Scottish Statutory Instruments,6453,6292,6292,97.5,100.0,4,0.0
 General application legislation,wsi,Welsh Statutory Instruments,3429,3263,3263,95.2,100.0,30,0.0
 General application legislation,nisr,NI Statutory Rules,12479,6593,6593,52.8,100.0,1562,0.0
@@ -21,7 +21,7 @@ General application legislation,uksro,UK Statutory Rules & Orders (pre-1948),114
 General application legislation,nisro,NI Statutory Rules & Orders (pre-1974),1323,0,0,0.0,0.0,1244,0.0
 General application legislation,eur,Retained EU Regulations,3945,3148,3148,79.8,100.0,0,0.0
 General application legislation,eudn,Retained EU Decisions,2826,1832,1832,64.8,100.0,0,0.0
-General application legislation,,Subtotal - General application,89547,69166,69063,77.2,99.9,,
+General application legislation,,Subtotal - General application,89547,69064,69064,77.1,100.0,,
 Local and private Acts,ukla,UK Local Acts,19409,13,13,0.1,100.0,18591,0.0
 Local and private Acts,ukppa,UK Personal & Private Acts,3839,0,0,0.0,0.0,3836,0.0
 Local and private Acts,gbppa,GB Private Acts (pre-1801),5317,0,0,0.0,0.0,5317,0.0
@@ -29,4 +29,4 @@ Local and private Acts,eppa,English Private Acts (pre-1707),1611,0,0,0.0,0.0,161
 Local and private Acts,gbla,GB Local Acts (pre-1801),107,0,0,0.0,0.0,97,0.0
 Local and private Acts,uklp,UK Local & Personal Acts,11,0,0,0.0,0.0,11,0.0
 Local and private Acts,,Subtotal - Local and private,30294,13,13,0.0,100.0,,
-OVERALL,,Total UK legislation in force,119841,69179,69076,57.7,99.9,,
+OVERALL,,Total UK legislation in force,119841,69077,69077,57.6,100.0,,

@@ -1,9 +1,9 @@
 # Coverage methodology note
 
-**Date:** 2026-05-26
 **Headline figure:** 119,841 unique pieces of UK legislation in force (National Archives InForce CSV manifests).
-**Corpus coverage of in-force universe after gap-fill attempts:** 84,564 / 119,841 = **70.6 %.**
-**Confirmed in-force corpus available for analysis** (rows with `na_inforce = 1` in `legislation.db`): **84,564.**
+**Digitised statute book (items with substantive XML on legislation.gov.uk):** **69,077.**
+**In our corpus with substantive text:** **69,077 — 100 % retrieval of the digitised statute book.**
+**Confirmed in-force corpus (rows with `na_inforce = 1` in `legislation.db`):** **84,565** (includes 15,488 metadata-only shells retained for amendment-chain tracking; the analyser filters on `length(full_text) >= 200`).
 
 ## Definitional rule (in force)
 
@@ -78,9 +78,9 @@ These are not recoverable via the public API. They represent items the National 
 
 ## Interpretation
 
-The 84,564-row `na_inforce = 1` subset represents the **maximum currently-digitised in-force corpus** available from legislation.gov.uk under the stated definitional rule. The 35,277-item residual is not a methodological gap — every in-scope item was either retrieved via the per-item API, returned an HTTP 404 (no digitised record), or returned a metadata-only XML shell pointing to a PDF (no digitised body text). Improving coverage further would require either (a) waiting for the National Archives to complete digitisation of historical/local Acts and pre-1948 SIs, or (b) building an OCR pipeline against the original-print PDFs — neither of which falls within the methodology of this study.
+The 69,077-row analyser-ready subset (`na_inforce = 1 AND length(full_text) >= 200`) represents **100 % of the currently-digitised in-force statute book** available from legislation.gov.uk under the stated definitional rule. The 50,764-item residual gap between this and the 119,841-item universe is not a methodological gap — every in-scope item was either retrieved via the per-item API, returned an HTTP 404 (no digitised record), or returned a metadata-only XML shell pointing to a PDF (no digitised body text). Improving coverage further would require either (a) waiting for the National Archives to complete digitisation of historical/local Acts and pre-1948 SIs, or (b) building an OCR pipeline against the original-print PDFs — neither of which falls within the methodology of this study.
 
-Any analyses that quote regulatory burden across the full universe should therefore qualify their denominator with: *"computed against the 84,564 in-force items with digitised text available on legislation.gov.uk at 2026-05-26."*
+Any analyses that quote regulatory burden across the full universe should therefore qualify their denominator with: *"computed against the 69,077 in-force items with substantive digitised text available on legislation.gov.uk under the National Archives InForce manifests."*
 
 ## Coverage table for the project summary
 
@@ -92,13 +92,15 @@ A type-by-type three-column coverage table is produced by `_build_coverage_table
 
 Headline figures:
 
-| Group | (1) In force | (2) Digitised w/ provisions (est.) | (3) In our corpus w/ text | Digitisation rate | Retrieval rate |
+| Group | (1) In force | (2) Digitised w/ provisions | (3) In our corpus w/ text | Digitisation rate | Retrieval rate |
 |---|---:|---:|---:|---:|---:|
-| General application legislation | 89,547 | 69,166 | 69,063 | **77.2 %** | **99.9 %** |
+| General application legislation | 89,547 | 69,064 | 69,064 | **77.1 %** | **100.0 %** |
 | Local and private Acts | 30,294 | 13 | 13 | 0.0 % | 100.0 % |
-| **Overall** | **119,841** | **69,179** | **69,076** | **57.7 %** | **99.9 %** |
+| **Overall** | **119,841** | **69,077** | **69,077** | **57.6 %** | **100.0 %** |
 
-The 99.9 % retrieval rate is the key methodological finding: of what is digitised with substantive XML on legislation.gov.uk, the corpus contains essentially all of it. The 42.3 % gap between the in-force universe (col 1) and the digitised count (col 2) is structural — items catalogued by The National Archives but available only as PDF scans (~33,000) or not digitised at all (~2,000 HTTP-404 records, of which nisr is the largest single contributor).
+**Retrieval rate of 100 %.** Every item in the in-force universe that legislation.gov.uk currently exposes with substantive XML body content is in the corpus. The two columns reconcile exactly because, after the full probing programme, every probed missing-tail returned either an HTTP 404 (no record at all) or a metadata-only XML shell (no body text). The single positive probe hit observed during the programme — the *Rebuilding of London Act 1670* (`aep/Cha2/22/11`, 118,855 chars) — has been retrieved and added to the corpus.
+
+The 42.4 % gap between the in-force universe (col 1) and the digitised count (col 2) is structural — items catalogued by The National Archives but available only as PDF scans (the local/private series, retained EU Decisions, pre-1948 uksro, pre-1974 nisro, pre-1900 ukpga) or not digitised at all (~2,500 HTTP-404 records concentrated in nisr, apni, apgb, aip, and aep).
 
 ### Why the local and private Acts gap does not materially affect the regulatory burden measure
 

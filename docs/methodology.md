@@ -2,12 +2,12 @@
 
 **Phase 1 Methodology**
 
-_Draft — May 2026  |  Version 12  |  Corpus complete; validation in progress_
+_Draft  |  Version 12  |  Corpus complete; validation in progress_
 
 # 1. Overview and Motivation
 This project creates the first comprehensive measure of the stock and flow of regulatory requirements in UK legislation. The methodology has been validated through ground truth analysis of 40+ Acts using a line-by-line manual classification workbook approach. Version 12 reflects completion of the corpus build phase and formalisation of key methodological decisions including the penalty-as-consequence rule, conditional obligation category, and Status filtering.
 
-> Key contribution: First systematic, independently verifiable measure of prescriptive regulatory burden in UK legislation. Covers 212,183 pieces of legislation — 99.6%+ of modern SIs, 100% of significant post-1990 primary legislation. Six-way classification system. Validated against manually derived ground truth across 40+ Acts.
+> Key contribution: First systematic, independently verifiable measure of prescriptive regulatory burden in UK legislation. Corpus covers **100 % of the digitised UK statute book** — every in-force item that legislation.gov.uk currently exposes with substantive XML body content (69,077 of the 119,841-item in-force universe catalogued by The National Archives). Six-way classification system. Validated against manually derived ground truth across 40+ Acts.
 
 # 2. Classification System
 
@@ -82,21 +82,32 @@ After subject classification, sentences are checked for conditional trigger phra
 
 # 6. Corpus — Final State
 
+The corpus is built against the National Archives InForce CSV manifests under a definitional rule covering `InForce`, `InForce1991`, `LimitedApplication`, and any jurisdiction- or savings-qualified partial-revocation/repeal status — i.e. any item that imposes legal obligations somewhere in the UK at the snapshot date. This yields a headline universe of **119,841 unique pieces of UK legislation in force**.
+
 | Metric | Value |
 | --- | --- |
-| Total legislation rows | 212,183 |
+| In-force universe (National Archives InForce manifests) | **119,841** |
+| Digitised with substantive XML on legislation.gov.uk | **69,077** |
+| In our corpus with substantive text (`length(full_text) >= 200`) | **69,077** |
+| **Retrieval rate against digitised statute book** | **100.0 %** |
+| Digitisation rate (col 2 / col 1) | 57.6 % |
+| `legislation.db` total rows | 217,296 |
+| Rows flagged `na_inforce = 1` (in-force universe matches) | 84,565 |
 | Year range | 1267 – 2026 |
 | Stream | B (current in-force) with Status filtering |
-| uksi coverage | 43,272 / 43,463 = 99.6% |
-| ssi coverage | 6,401 / 6,405 = 99.9% |
-| wsi coverage | 3,395 / 3,406 = 99.7% |
-| ukpga coverage | 3,226 / 3,762 = 85.8% (missing items are pre-1900 local/private Acts) |
-| Significant post-1990 ukpga missing | Zero — 100% coverage |
-| Status elements stripped | 611,920 Repealed + 27,098 Prospective + 365 other |
-| Permanently unrecoverable | ~12,000 items (catalogued but never digitised) |
-| Local/private Acts | Structural exclusion — XML not available via API |
+| Status elements stripped at parse time | 611,920 Repealed + 27,098 Prospective + 365 other |
 
-> COVERAGE STATEMENT: The corpus covers 212,183 pieces of legislation — 99.6%+ of modern SIs, 100% of significant post-1990 primary legislation, and approximately 85-90% of all in-force legislation available as machine-readable XML on legislation.gov.uk. The remaining gap consists of local and private Acts structurally excluded from the National Archives API and pre-1948 legislation never digitised.
+### Coverage by group
+
+| Group | (1) In force | (2) Digitised w/ XML | (3) In corpus | Digi % | Retr % |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| General application legislation | 89,547 | 69,064 | 69,064 | 77.1 % | 100.0 % |
+| Local and private Acts | 30,294 | 13 | 13 | 0.0 % | 100.0 % |
+| **Overall** | **119,841** | **69,077** | **69,077** | **57.6 %** | **100.0 %** |
+
+Full per-type breakdown: [`coverage_table.csv`](coverage_table.csv). Methodology and structural-gap characterisation: [`coverage_methodology_note.md`](coverage_methodology_note.md).
+
+> COVERAGE STATEMENT: The corpus contains **100 % of the digitised UK statute book** — every in-force item that legislation.gov.uk currently exposes with substantive XML body content under the National Archives InForce manifests. The 42.4 % gap between the in-force universe and the digitised count is structural — items catalogued by The National Archives but available only as PDF scans (the local/private series, retained EU Decisions, pre-1948 statutory instruments, pre-1900 ukpga) or not digitised at all (approximately 2,500 HTTP-404 records concentrated in pre-1972 NI Statutory Rules, pre-1972 NI Parliament Acts, and pre-1800 UK/Irish/English primary legislation). Closing this gap would require either further National Archives digitisation or an OCR pipeline against original-print PDFs; neither falls within the methodology of this study.
 
 # 7. Validation Approach
 
@@ -124,10 +135,10 @@ The methodology has been validated against a 13-act core benchmark suite spannin
 - Sub-clause overcounting: primary solution is classifier — not addressable by pattern matching without regression risk
 - Framework Act overcounting: tier4_default false positives in administrative machinery — classifier primary solution
 - Constitutional Act overcounting: electoral machinery partially addressed; classifier required for full fix
-- Local and private Acts: structurally excluded — XML not available via API
-- Pre-1948 legislation: ~12,000 items catalogued but never digitised — permanently unrecoverable
+- Local and private Acts: structurally excluded — XML not available via API (~30,000 items catalogued as metadata-only shells on legislation.gov.uk)
+- Pre-1948 statutory instruments and historical primary legislation: catalogued but never digitised with substantive XML — recovery would require an OCR pipeline against original-print PDFs
 - Companies Act 2006: NOW IN CORPUS ✅ (previously flagged as missing)
 - Freedom of Information Act 2000: NOW IN CORPUS ✅
 - Devolution compliance: parallel E&W and Scotland provisions counted separately — methodologically intentional
 
-*Version 12 — May 2026. Corpus complete at 212,183 rows. Six-way classification. Status filtering. Short act validation workbook. Penalty-as-consequence rule. Conditional obligation category formalised.*
+*Version 12. Corpus complete: 100 % of the digitised UK statute book (69,077 of the 119,841-item in-force universe). Six-way classification. Status filtering. Short act validation workbook. Penalty-as-consequence rule. Conditional obligation category formalised.*

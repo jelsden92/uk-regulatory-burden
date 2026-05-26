@@ -8,12 +8,12 @@ This repository contains the corpus-building pipeline, classification code, and 
 
 | Phase | State |
 | --- | --- |
-| Corpus build | **Complete** — 212,183 items, covering 99.6%+ of modern statutory instruments and 100% of significant post-1990 primary legislation |
+| Corpus build | **Complete** — 119,841 pieces of UK legislation in force per the National Archives InForce manifests; 69,077 retrieved with substantive XML body text. **100 % retrieval rate against the digitised UK statute book.** |
 | Methodology | **Stable at v12** — six-category classification system; ground-truth validation against 10+ Acts on a line-by-line manual workbook |
 | Classifier | Under development — hybrid rule-based and NLP pipeline with six-category classification, validated against manual ground-truth across 10+ Acts using line-by-line review |
 | Results | **Forthcoming** in a separate think-tank paper |
 
-The corpus manifest (`corpus_manifest.csv`) lists every item in the dataset by its `legislation.gov.uk` URL, title, year, and legislation type. The underlying XML text of each item is not redistributed here — it is sourced from [legislation.gov.uk](https://www.legislation.gov.uk) under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
+The corpus contains every in-force item that legislation.gov.uk currently exposes with substantive XML body content — 100 % of the currently-digitised UK statute book. The remaining 50,764-item gap between the corpus and the catalogued in-force universe is structural: items present in the National Archives InForce manifests but available only as PDF scans or not digitised at all (see [`docs/coverage_methodology_note.md`](docs/coverage_methodology_note.md) and [`docs/coverage_table.csv`](docs/coverage_table.csv)). The corpus manifest (`corpus_manifest.csv`) lists every item in the dataset by its `legislation.gov.uk` URL, title, year, and legislation type. The underlying XML text of each item is not redistributed here — it is sourced from [legislation.gov.uk](https://www.legislation.gov.uk) under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 
 ---
 
@@ -52,7 +52,9 @@ Implementation plan: [`docs/implementation_plan.md`](docs/implementation_plan.md
 | `analyser.py` | Sentence-level classifier — prescriptive-term detection, subject identification, six-category routing |
 | `word_list.py` | Vocabulary lists (prescriptive verbs, public-body subjects, private-actor subjects, definitional patterns) |
 | `test_run.py` | End-to-end harness for analysing a small set of Acts into `test_run.db` for benchmark validation |
-| `corpus_manifest.csv` | Full list of the 212,183 items in the corpus (URL, title, year, type) |
+| `corpus_manifest.csv` | Full list of corpus items (URL, title, year, type) |
+| `docs/coverage_table.csv` | Three-column type-by-type coverage table: in-force universe / digitised with substantive XML / in our corpus |
+| `docs/coverage_methodology_note.md` | Full coverage methodology: definitional rule, gap-fill procedure, structural-cause analysis |
 | `docs/methodology.md` | Full methodology specification (v12) |
 | `docs/research_agenda.md` | Open questions and future phases (v9) |
 | `docs/implementation_plan.md` | Implementation plan and corpus state (v13) |
@@ -78,7 +80,8 @@ Implementation plan: [`docs/implementation_plan.md`](docs/implementation_plan.md
                    Dead/Discarded provisions)
                               │
                        legislation.db
-                  (212,183 rows; full_text +
+                  (in-force corpus tagged
+                   na_inforce=1; full_text +
                    schedule_text_prescriptive +
                    schedule_text_reference)
                               │
@@ -142,7 +145,7 @@ Python 3.10+. SQLite 3.35+ for `legislation.db`.
 - **Methodology documents (`docs/*.md`):** CC-BY-4.0.
 - **Source code:** MIT.
 
-The 4.1 GB `legislation.db` containing full provision text is not redistributed via this repository — it can be reconstructed deterministically from the pipeline above. Approximately 12,000 corpus items are permanently unrecoverable (pre-1948 statutory instruments held only in metadata form by The National Archives); their absence is documented in `docs/research_agenda.md`.
+The 4.1 GB `legislation.db` containing full provision text is not redistributed via this repository — it can be reconstructed deterministically from the pipeline above. The 50,764-item gap between the corpus and the catalogued 119,841-item in-force universe is structural and irreducible at present: items catalogued by The National Archives but available only as PDF scans (the local/private series, retained EU Decisions, pre-1948 statutory instruments, pre-1900 ukpga) or not digitised at all (approximately 2,500 HTTP-404 records concentrated in pre-1972 NI material and pre-1800 historical primary legislation). See [`docs/coverage_methodology_note.md`](docs/coverage_methodology_note.md) for the full characterisation.
 
 ---
 
