@@ -7,7 +7,7 @@ _Draft  |  Version 12  |  Corpus complete; validation in progress_
 # 1. Overview and Motivation
 This project creates the first comprehensive measure of the stock and flow of regulatory requirements in UK legislation. The methodology has been validated through ground truth analysis of 40+ Acts using a line-by-line manual classification workbook approach. Version 12 reflects completion of the corpus build phase and formalisation of key methodological decisions including the penalty-as-consequence rule, conditional obligation category, and Status filtering.
 
-> Key contribution: First systematic, independently verifiable measure of prescriptive regulatory burden in UK legislation. Corpus comprises **69,077 fully digitised pieces of in-force UK legislation** — 100 % of the items that legislation.gov.uk currently exposes with substantive machine-readable XML, within a wider National Archives in-force universe of 119,841 catalogued items. Six-way classification system. Validated against manually derived ground truth across 40+ Acts.
+> Key contribution: First systematic, independently verifiable measure of prescriptive regulatory burden in UK legislation. Corpus comprises **69,462 fully digitised pieces of in-force UK legislation** — 100 % of the items that legislation.gov.uk currently exposes with substantive machine-readable XML, within a wider National Archives in-force universe of 119,841 catalogued items. Coverage is reported at three nested scopes: 58 % across the full universe, 77 % excluding local & private Acts, 91 % for post-1990 general-application legislation. Six-way classification system. Validated against manually derived ground truth across 40+ Acts.
 
 # 2. Classification System
 
@@ -88,33 +88,32 @@ The corpus is built against the National Archives InForce CSV manifests under a 
 
 | Tier | Description | Items | % of universe |
 | --- | --- | ---: | ---: |
-| **Tier 1 — Fully digitised** | `/data.xml` returns substantive XML with `NumberOfProvisions > 0`; corpus row has `full_text >= 200` chars. **This is the analyser input — the headline corpus figure.** | **69,077** | **57.6 %** |
-| Tier 2 — Retrieved but metadata-only | `/data.xml` returns valid XML with `NumberOfProvisions = 0` (title, year, number, PDF link only). Row exists in `legislation.db` with `na_inforce = 1` but no substantive body text. | 15,488 | 12.9 % |
-| Tier 3 — Not digitised at all | `/data.xml` returns HTTP 404. Item is catalogued in the InForce manifest but has no XML or HTML representation on legislation.gov.uk. | 35,276 | 29.4 % |
+| **Tier 1 — Fully digitised** | `/data.xml` returns substantive XML with `NumberOfProvisions > 0`; corpus row has `full_text >= 200` chars. **This is the analyser input — the headline corpus figure.** | **69,462** | **58.0 %** |
+| Tier 2 — Retrieved but metadata-only | `/data.xml` returns valid XML with `NumberOfProvisions = 0` (title, year, number, PDF link only), or content stripped at parse time as Prospective/Repealed. Row exists in `legislation.db` with `na_inforce = 1` but no analyser-usable body text. | 15,895 | 13.3 % |
+| Tier 3 — Not digitised at all | `/data.xml` returns HTTP 404. Item is catalogued in the InForce manifest but has no XML or HTML representation on legislation.gov.uk. | 34,484 | 28.8 % |
 | **Total — In-force universe** | National Archives InForce manifest under the in-force definitional rule | **119,841** | 100.0 % |
 
 | Metric | Value |
 | --- | --- |
-| **Headline corpus figure (Tier 1, analyser input)** | **69,077** |
+| **Headline corpus figure (Tier 1, analyser input)** | **69,462** |
 | In-force universe (National Archives InForce manifests) | 119,841 |
-| Retrieval rate against fully-digitised statute book | **100.0 %** |
-| `legislation.db` total rows | 217,296 |
-| Rows flagged `na_inforce = 1` | 84,565 |
+| `legislation.db` total rows | 218,088 |
+| Rows flagged `na_inforce = 1` | 85,357 |
 | Year range | 1267 – 2026 |
 | Stream | B (current in-force) with Status filtering |
 | Status elements stripped at parse time | 611,920 Repealed + 27,098 Prospective + 365 other |
 
-### Tier 1 coverage by group
+### Scope-stratified coverage
 
-| Group | In-force universe | Tier 1 (analyser input) | Coverage |
-| --- | ---: | ---: | ---: |
-| General application legislation | 89,547 | 69,064 | 77.1 % |
-| Local and private Acts | 30,294 | 13 | 0.0 % |
-| **Overall** | **119,841** | **69,077** | **57.6 %** |
+| Scope | Description | In-force universe | In corpus | Coverage |
+| --- | --- | ---: | ---: | ---: |
+| **A — Full universe** | Every in-force item across all 28 leg_types | 119,841 | 69,462 | **58.0 %** |
+| **B — General application** | Excludes ukla / ukppa / gbppa / eppa / gbla / uklp | 89,548 | 69,272 | **77.4 %** |
+| **C — Post-1990 general application** | Scope B AND year ≥ 1990 | 67,403 | 61,349 | **91.0 %** |
 
-Full per-type breakdown: [`coverage_table.csv`](coverage_table.csv). Methodology and structural-gap characterisation: [`coverage_methodology_note.md`](coverage_methodology_note.md).
+Full per-type breakdown: [`coverage_table.csv`](coverage_table.csv). Methodology, exhaustion sweep, and structural-gap characterisation: [`coverage_methodology_note.md`](coverage_methodology_note.md).
 
-> CORPUS STATEMENT: The analyser operates on **69,077 fully digitised pieces of in-force UK legislation** — every item from the National Archives InForce manifests that legislation.gov.uk currently exposes with substantive machine-readable XML. This represents 100 % of the fully digitised UK statute book. The remaining 50,764 catalogued items (Tier 2 metadata-only shells, 15,488; Tier 3 not digitised, 35,276) cannot be brought into the analyser without either further National Archives digitisation or an OCR pipeline against original-print PDFs; neither falls within the methodology of this study.
+> CORPUS STATEMENT: The analyser operates on **69,462 fully digitised pieces of in-force UK legislation** — every item from the National Archives InForce manifests that legislation.gov.uk currently exposes with substantive machine-readable XML, after an exhaustion sweep across every retrieval channel (`/data.xml`, `/data.xml?version=enacted`, `/enacted/data.xml`, `/data.xht`, `/data.akn`, `/data.feed`) and a full cross-reference against the legislation.gov.uk Best Collection bulk download. Coverage on the full in-force universe is 58 %; excluding local and private Acts (which apply only to named persons, places, or institutions and do not impose general-application obligations) raises this to 77 %; restricting to post-1990 general-application law raises it to 91 %. The remaining structural gap (Tier 2 metadata-only shells, 15,895; Tier 3 not digitised, 34,484) cannot be brought into the analyser without either further National Archives digitisation or an OCR pipeline against original-print PDFs; neither falls within the methodology of this study.
 
 # 7. Validation Approach
 
@@ -148,4 +147,4 @@ The methodology has been validated against a 13-act core benchmark suite spannin
 - Freedom of Information Act 2000: NOW IN CORPUS ✅
 - Devolution compliance: parallel E&W and Scotland provisions counted separately — methodologically intentional
 
-*Version 12. Corpus complete: 69,077 fully digitised pieces of in-force UK legislation (the analyser input) — 100 % of the items that legislation.gov.uk currently exposes with substantive machine-readable XML, within a wider National Archives in-force universe of 119,841 catalogued items. Six-way classification. Status filtering. Short act validation workbook. Penalty-as-consequence rule. Conditional obligation category formalised.*
+*Version 12. Corpus complete: 69,462 fully digitised pieces of in-force UK legislation (the analyser input), within a wider National Archives in-force universe of 119,841 catalogued items. Coverage at three nested scopes: 58 % full universe / 77 % excluding local & private Acts / 91 % post-1990 general application. Exhaustion sweep across all retrieval channels and Best Collection bulk download confirms no further substantive content is recoverable. Six-way classification. Status filtering. Short act validation workbook. Penalty-as-consequence rule. Conditional obligation category formalised.*

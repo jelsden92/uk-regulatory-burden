@@ -8,12 +8,20 @@ This repository contains the corpus-building pipeline, classification code, and 
 
 | Phase | State |
 | --- | --- |
-| Corpus build | **Complete — 69,077 fully digitised pieces of in-force UK legislation**, i.e. 100 % of the items that legislation.gov.uk currently exposes with substantive machine-readable XML. This is the analyser input. |
+| Corpus build | **Complete — 69,462 fully digitised pieces of in-force UK legislation**, i.e. 100 % of the items that legislation.gov.uk currently exposes with substantive machine-readable XML. This is the analyser input. |
 | Methodology | **Stable at v12** — six-category classification system; ground-truth validation against 10+ Acts on a line-by-line manual workbook |
 | Classifier | Under development — hybrid rule-based and NLP pipeline with six-category classification, validated against manual ground-truth across 10+ Acts using line-by-line review |
 | Results | **Forthcoming** in a separate think-tank paper |
 
-The headline corpus figure — **69,077 pieces of fully digitised in-force UK legislation** — sits inside a wider universe of 119,841 in-force items catalogued by The National Archives. The 50,764-item difference is structural and is not a retrieval failure: 15,488 items were retrieved from legislation.gov.uk but are metadata-only XML shells pointing to PDF originals, and 35,276 items return HTTP 404 on `/data.xml` and are not digitised at all. See [`docs/coverage_methodology_note.md`](docs/coverage_methodology_note.md) and [`docs/coverage_table.csv`](docs/coverage_table.csv) for the full three-tier breakdown by legislation type.
+The headline corpus figure — **69,462 pieces of fully digitised in-force UK legislation** — sits inside a wider universe of 119,841 in-force items catalogued by The National Archives. Reporting a single coverage ratio across that universe conflates two structurally different populations, so coverage is reported at three nested scopes:
+
+| Scope | Description | In-force universe | In corpus | Coverage |
+|---|---|---:|---:|---:|
+| **A — Full universe** | Every in-force item across all 28 leg_types | 119,841 | 69,462 | **58.0 %** |
+| **B — General application** | Excludes local & private Acts (ukla, ukppa, gbppa, eppa, gbla, uklp) | 89,548 | 69,272 | **77.4 %** |
+| **C — Post-1990 general application** | Scope B AND year ≥ 1990 (modern regulatory law) | 67,403 | 61,349 | **91.0 %** |
+
+The 91 % post-1990 figure is the most directly relevant denominator for any analysis of contemporary regulatory burden. The 58 % full-universe figure is reported for completeness — the 50,380-item residual is structural and not a retrieval failure: 15,895 items are catalogued but exist on legislation.gov.uk only as metadata-only XML shells pointing to PDF originals, and 34,484 items return HTTP 404 on `/data.xml` and are not digitised at all. An exhaustion sweep across the per-item API (`/data.xml`, `/data.xml?version=enacted`, `/enacted/data.xml`, `/data.xht`, `/data.akn`, `/data.feed`) plus a full cross-reference against the legislation.gov.uk Best Collection bulk download confirmed that no further substantive content is recoverable. See [`docs/coverage_methodology_note.md`](docs/coverage_methodology_note.md) and [`docs/coverage_table.csv`](docs/coverage_table.csv) for the full breakdown by legislation type.
 
 The corpus manifest (`corpus_manifest.csv`) lists every item in the dataset by its `legislation.gov.uk` URL, title, year, and legislation type. The underlying XML text of each item is not redistributed here — it is sourced from [legislation.gov.uk](https://www.legislation.gov.uk) under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 
@@ -147,7 +155,7 @@ Python 3.10+. SQLite 3.35+ for `legislation.db`.
 - **Methodology documents (`docs/*.md`):** CC-BY-4.0.
 - **Source code:** MIT.
 
-The 4.1 GB `legislation.db` containing full provision text is not redistributed via this repository — it can be reconstructed deterministically from the pipeline above. The analyser operates on the 69,077-row fully-digitised subset (`na_inforce = 1 AND length(full_text) >= 200`). The remaining 50,764 items in the National Archives in-force universe consist of 15,488 metadata-only XML shells pointing to PDF originals (the local/private series, retained EU Decisions, pre-1948 statutory instruments, pre-1900 ukpga) and 35,276 records that return HTTP 404 on `/data.xml` (concentrated in pre-1972 NI material and pre-1800 historical primary legislation). See [`docs/coverage_methodology_note.md`](docs/coverage_methodology_note.md) for the full characterisation.
+The 4.1 GB `legislation.db` containing full provision text is not redistributed via this repository — it can be reconstructed deterministically from the pipeline above. The analyser operates on the 69,462-row fully-digitised subset (`na_inforce = 1 AND length(full_text) >= 200`). The remaining 50,380 items in the National Archives in-force universe consist of 15,895 metadata-only XML shells pointing to PDF originals (the local/private series, retained EU Decisions, pre-1948 statutory instruments, pre-1900 ukpga) and 34,484 records that return HTTP 404 on `/data.xml` (concentrated in pre-1972 NI material and pre-1800 historical primary legislation). See [`docs/coverage_methodology_note.md`](docs/coverage_methodology_note.md) for the full characterisation.
 
 ---
 
