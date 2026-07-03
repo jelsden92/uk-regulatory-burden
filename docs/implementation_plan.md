@@ -1,113 +1,125 @@
 # UK Regulatory Burden Measurement
 
-**Phase 1 Implementation Plan  —  Version 13**
+**Phase 1 Implementation Plan  —  Version 15**
 
-_May 2026  |  Corpus complete. Validation in progress. Classifier next._
+_July 2026  |  Corpus complete. **Architecture reframed: extraction pipeline → dual-model labelling → Legal-BERT.** Extraction rebuilt to a two-stage, section-level design (2026-07-03). Rule-based classifier retired._
 
-> STATUS: Corpus complete at 212,183 rows — 99.6%+ SI coverage, 100% post-1990 Acts. Status filtering active. 9 Acts validated in workbook. Next: complete 20 short Acts manually, build preliminary classifier, continue to 50 Acts, full Colab run.
+> STATUS: Corpus complete (212,183 rows; 98%+ structured XML cached locally). The rule-based classifier is **retired as a classifier** — only its extraction / candidate-filtering pipeline survives. Classification now: a high-recall candidate-extraction pipeline surfaces candidate burden sentences with context; Claude and Gemini independently classify them against the rubric; the human lead adjudicates disagreements; the validated labels train **Legal-BERT**, which is the production classifier that runs the corpus.
 
-# Immediate Next Steps
-- 1. Complete manual validation of next 12 short Acts (links in Research Agenda)
-- 2. Include 5-6 Victorian Acts in manual validation for classifier training data
-- 3. Download all 12 manual review Acts into test_run.db — analyser counts ready for comparison
-- 4. Build preliminary classifier at 20 Acts validated
-- 5. Continue validation to 50 Acts
-- 6. Sync Colab notebook (uk_reg_colab_v4.ipynb → v5) with all recent fixes
-- 7. Full Stream B run on Colab after production classifier integrated
+# Architecture (2026-06-14 REFRAME — central change)
+
+The earlier plan was to keep fixing the rule-based classifier (`analyser.py`) and run it over the corpus. **That is superseded.** The rule-based keyword/subject-resolution classification was tuned for precision and was, on a preliminary read, **over-identifying private-actor obligations** (precise rate pending a larger unflagged sample — see Limitations; treat as a *preliminary* finding, not established). The new architecture:
+
+1. **`extract_candidates.py` — high-recall, two-stage candidate pipeline (rebuilt 2026-07-03).** Reuses `downloader`'s ingest + CLML status filter and the `word_list` vocabulary. **The unit is the section/provision, not the sentence.** A DOM-keyed section anchor groups each provision — outermost P-level (UK sections / EU articles / schedule P-levels) ∪ innermost numbered `Division`/`Para` (EU recitals, schedule paragraphs) — tagged with `material_type` (uk_body / uk_schedule / eu_article / eu_recital / orphan). **Stage 1** flags a section if ≥1 recall cue fires *anywhere in its subtree*, so a cue-less enumerated leaf rides in on its chapeau's cue instead of being silently dropped (the previous per-sentence emission dropped ~7,786 such leaves across the 7-Act set; the rebuild recovers 6,051 of them). Each flagged section is emitted as ONE candidate: the full assembled block (chapeau + leaves, markers/structure preserved, **no truncation** — the old `sentence[:2000]` cap is removed), plus `leaves[]` as a structured list. Keyed on DOM node identity (`section_index`), never `section_ref` (which is non-unique — "24(1)" maps to five distinct provisions in EP Regs). `candidate_cue` / `material_type` / `is_in_schedule` are HINTS; no category/polarity label is emitted here.
+2. **Dual-model labelling (RATIFIED DESIGN — not yet built).** Because the candidate unit is the section and one section may carry several distinct burdens, Stage 2 emits a **burden-set per section** (optimised for the common 1–2-burden case but structurally able to represent the multi-duty tail). Claude and Gemini independently decompose and classify each section against the rubric (six categories + polarity), and agreement is **set-vs-set** (same count, same per-burden labels), not single-label match. The label store / version-control is established here before any real label is emitted. This is the next deliberate design step.
+3. **Human adjudication.** Agreements → high confidence + light spot-check; disagreements (category OR polarity) → the high-value review queue, adjudicated by the human lead against the rubric.
+4. **Legal-BERT (production classifier).** The validated labels train a fine-tuned Legal-BERT, which runs the full corpus. The same extraction pipeline feeds it.
+
+The rubric (`uk_reg_validation_rubric_v2_draft.docx`) is the conceptual classification guide for steps 2–3. It is **awaiting the project lead's full sign-off before it is authoritative (v1.0).**
+
+# DROPPED / SUPERSEDED by the reframe
+
+| Item | Why dropped |
+| --- | --- |
+| **spaCy `en_core_web_trf` upgrade** | Only served rule-based *subject resolution*, which Legal-BERT + LLM labelling replaces. (`SPACY_MODEL` constant landed; validation runs cancelled.) |
+| **Category 2 / Category 5 classifier fixes** (`conditional_direct` detection; redefining `conditional_burden`) | The candidate filter only needs to *surface* these sentences; the LLM+human layer assigns the category. No rule-based heuristic needed. |
+| **`private_actor` → `direct_burden` tag migration** | The rule-based classification output is retired, so there is nothing to migrate. The rubric tags become the LLM/Legal-BERT label schema (greenfield), not a DB migration. |
+
+# RESOLVED — structured XML is cached locally (no corpus crawl, ever)
+
+The raw structured CLML XML is already on disk in `Bulk download/` — the DB storing only flattened text did not mean the source XML was gone. **~98% of the in-force corpus (68,380 / 69,462) is on disk;** no 69k-item crawl of legislation.gov.uk is required.
+
+- **Source priority (decisive, per distinct item_url):** revised-current's `revised` variant → best-collection's `revised` variant where RC lacks it → `made`/`enacted` ONLY where no revision exists in either source. This **reversed an earlier "best-collection only" conclusion**: best-collection serves stale *as-made* text for thousands of amended SIs (51,255 corpus SIs are `made`-only in BC; ~5,822 have a revised version only in revised-current, ~27% materially different) and lacks 7 in-force retained-EU items that exist only in revised-current.
+- **Read variant info from the files on disk, not `best_collection_index.json`** — that index is stale on variants and trusting it would reintroduce the stale-text problem.
+
+# LIVE NEXT STEPS
+
+1. **DONE (2026-07-03) — extraction rebuilt to the two-stage section-level design and verified** on the 7-Act set: resolved-section counts reproduce the measured baseline exactly (727 uk_body / 862 schedule / 106 eu_article / 611 eu_recital); 6,051 previously-dropped cue-less leaves now recovered inside their flagged sections; max assembled block 23,213 chars with zero truncation; section_ref collisions kept distinct via DOM-identity keying.
+2. **Repoint `extract_candidates.py` to read the local bulk downloads** — revised-current primary, best-collection fallback, with the three-tier variant priority above; read variants from files, not the stale index. (Currently it fetches `/data.xml` live; only needed because the cache wasn't yet wired in.)
+3. **Design + build Stage 2 — dual-model labelling.** The burden-set-per-section schema, set-vs-set agreement, and the label store / version-control are ratified but NOT yet built; this is the next deliberate design step (no real label is emitted until the store is in place).
+4. **Hold the cue inventory / high-recall discipline as the measurement ceiling.** The `word_list` union is the candidate vocabulary; recall additions (rights/entitlements, void/contracting-out, Victorian `shall forfeit`, enforcement-submit, etc.) closed real holes. Audit recall empirically against ground-truth before scaling — anything dropped is invisible downstream.
+5. **Build the validated training data toward Legal-BERT.**
+6. **Rubric v2 → v1.0** — awaiting the project lead's full sign-off before it is authoritative.
+7. **Deferred: line-by-line calibration reads** once the extraction pipeline is stable.
+
+# QUEUED FOR LATER (corpus-run-time, not now)
+
+- Physical deletion of `analyser.py` + cleanup of the ~15 dependent throwaway scripts (currently retired via banner; deferred until `extract_candidates.py` is validated at scale).
+- A variant-aware, priority-resolved local file index (item_url → chosen file under the three-tier rule).
+- A small *targeted* fetch of the exhaustion-sweep gap-fillers (the ~1,082 items absent from the bulk, e.g. old ukpga) — one at a time, never a crawl.
+
+# STILL RUNNING
+- The Colab API-exhaustion sweep (resumable, durable v3 checkpoint).
 
 # Corpus — Final State
 
 | Metric | Value |
 | --- | --- |
 | Total rows | 212,183 |
+| In-force corpus (na_inforce=1, text≥200) | 69,462 distinct items (zero double-counting) |
+| Structured XML cached locally | ~98% of in-force corpus, in `Bulk download/` |
 | uksi coverage | 99.6% (43,272/43,463) |
-| ssi coverage | 99.9% (6,401/6,405) |
-| wsi coverage | 99.7% (3,395/3,406) |
-| nisr coverage | 86.7% (10,475/12,078) |
 | Post-1990 ukpga | 100% — all significant Acts present |
-| Companies Act 2006 | Present ✅ (2.97 MB) |
-| Freedom of Information Act 2000 | Present ✅ |
 | Status filtering | Active — 639,000+ no-force elements stripped |
 | Permanently unrecoverable | ~12,000 items (never digitised) |
 | Further downloads | Not recommended — diminishing returns confirmed |
 
-# Six-Category Classification System
+# The Six Rubric Categories (assigned by LLM+human → Legal-BERT, NOT rule-based detection)
 
-| Category | Detection | Key decisions |
-| --- | --- | --- |
-| private_actor | Word list + subject classification + tier4_default | Standing obligations on private actors |
-| implied_burden | IMPLIED_OBLIGATION_WORDS ('shows that', 'proves that') | Defence provisions revealing compliance obligations |
-| implied_burden_active | IB + ACTIVE_COMPLIANCE_MARKERS | Adequate procedures, due diligence type obligations |
-| conditional_obligation | Trigger phrase check after subject classification | Obligations activated by notice, licence, order, or regulatory suspicion |
-| conditional_burden | POSITIVE_ID_REQUIRED_TERMS | Anti-avoidance provisions |
-| public_body | PUBLIC_BODY_SUBJECTS match | Excluded from headline metric |
-| ambiguous | Clause opener / structural subject / no subject | Flagged for review |
+The taxonomy is unchanged; what changed is *who assigns it*. Detection is no longer keyword/subject-resolution — the candidate filter only surfaces; classification is the rubric-driven LLM+human+Legal-BERT layer. Plus a separate **polarity** attribute (obligation / prohibition / review) on every category.
 
-# Key Word List Additions — Recent
-- PRIVATE_ACTOR_SUBJECTS: 'the parties' — Late Payment Act commercial contract law
-- PRESCRIPTIVE_WORDS obligations: 'it is an implied term' — Late Payment Act s.1(1)
-- PRESCRIPTIVE_WORDS obligations: 'has the right not to be subjected/dismissed/treated' — employment anti-retaliation
-- DEFINITIONAL_PATTERNS: 'shall operate to', 'shall take effect as', 'shall be deemed to have' — pre-1970 deemed consequences
-- DEFINITIONAL_PATTERNS: 'shall not be construed as', 'no provision shall be made', 'no amendment shall be made' — ministerial restrictions
-- STRUCTURAL_SUBJECTS: 'poll', 'votes', 'seat', 'seats', 'ballot', 'vacancy', 'allocation', 'register' — electoral machinery
-- PUBLIC_BODY_SUBJECTS: 'a Scottish Minister', 'the First Minister', 'the Presiding Officer', 'a member of the Scottish Parliament' etc.
+| Rubric category | Tag |
+| --- | --- |
+| Direct burden | `direct` |
+| Conditional direct obligation | `conditional_direct` |
+| Implied burden | `implied_burden` |
+| Implied burden active | `implied_burden_active` |
+| Conditional burden | `conditional_burden` |
+| Ambiguous | `ambiguous` |
+
+> Note: `private_actor` is the parent class (the sentence imposes a private-actor burden), not a category tag. (The rule-based analyser used `private_actor` as the Direct leaf; that classifier is retired, so no DB migration is performed.)
+
+# Candidate-filter vocabulary (`word_list`) — the measurement ceiling
+
+The vocabulary now serves the high-recall **candidate filter**, not rule-based classification. The union of all cue sets surfaces candidates; precision signals (definitional / structural / clause-opener / purpose-clause) are **non-blocking hints**, never silent drops. Recall additions that closed real holes: rights/entitlements (§5B correlative duties), restriction-as-prohibition, void/contracting-out (was wrongly in the drop list), responsibility framing, defence framing, Victorian penalty-as-obligation (`shall forfeit`), enforcement-submit (Cat-5 duties), and a leading-imperative-verb backstop for list-item fragments.
 
 # Validation Workbook — Current State
-Reg_Burden_Project_Validation.xlsx — 9 Acts complete with full line-by-line classification. Each row records: burden sentence, section reference, Direct Burden, Implied Burden, Conditional Burden, Ambiguous, Claude agrees, Resolution.
+`Reg_Burden_Project_Validation.xlsx` — short-Act sample with full line-by-line classification (burden sentence, section reference, Direct/Implied/Conditional/Ambiguous, Claude agrees, Resolution). Now serves as ground truth for the rubric, the recall check for the candidate filter, and seed training data for Legal-BERT.
 
-> KEY DECISIONS FORMALISED IN WORKBOOK: (1) Penalty as consequence — not counted separately; (2) Conditional burden includes regulatory inspection/seizure powers — condition is suspicion not guilt; (3) Evidence supply is part of parent obligation; (4) Judicial discretion provisions are not private actor burdens; (5) Definitional tests are not separate from the prohibitions they define; (6) Nested burdens — scope definitions are not additional obligations.
+> KEY DECISIONS FORMALISED: (1) Penalty as consequence — not counted separately; (2) Conditional categories split by trigger control — organic operational event (Cat 2 `conditional_direct`) vs external authority act (Cat 5 `conditional_burden`); (3) Evidence supply is part of parent obligation; (4) Judicial discretion is not a private-actor burden; (5) Definitional tests are not separate from the prohibitions they define; (6) Nested/scope definitions are not additional burdens; (7) Licence to operate is a Direct burden, not conditional.
 
 # Replication Guide — Building a Similar Regulatory Burden Measure
 ## Step 1 — Data Acquisition
-- Register for access to research.legislation.gov.uk/statute-book-data
-- Download Revised Current bulk ZIP — all legislation types (~2.5GB)
-- Download Best Collection bulk ZIP — fills gaps where only enacted version exists (~1.35GB)
-- Run missing_si_downloader.py against InForce CSV to fill remaining SI gaps (~57,000 items)
-- Run PDFOnly, InForce1991, JurisdictionLimited queues for maximum coverage
-- Add name and email to user agent string — required by National Archives fair use policy
+- Register for research.legislation.gov.uk/statute-book-data.
+- Download **Revised Current** bulk ZIP (the current consolidated/amended text — the PRIMARY source) and **Best Collection** bulk ZIP (fallback, fills items with only an enacted/made version). Keep both: Best Collection serves *as-made* text and must not be the sole source for amended SIs.
+- Fill remaining SI gaps from the InForce CSV; add name + email to the user-agent per National Archives fair-use policy.
 
-## Step 2 — Database Setup
-- SQLite database with legislation table (item_url, title, year, leg_type, stream, full_text, schedule_text, territorial_extent)
-- bulk_loader.py reads CLML XML files, calls parse_xml() with Status filtering, inserts into DB
-- Status filtering: strip_no_force_provisions() decomposes elements with Status in {Prospective, Repealed, Dead, Discarded, Prospective Repealed}
-- Resume-safe loading — skip already-present items by item_url
+## Step 2 — Database / cache Setup
+- SQLite `legislation` table + the bulk XML retained on disk (structure is needed for context attachment; flattened text alone is insufficient).
+- Status filtering: `strip_no_force_provisions()` decomposes elements with Status in {Prospective, Repealed, Dead, Discarded, Prospective Repealed}.
+- Resume-safe, deduplicated by item_url.
 
-## Step 3 — Word List Construction
-- Core prescriptive words by category: obligations, prohibitions, penalty terms, implied obligation words
-- Public body subjects — comprehensive list of ministerial, regulatory, and judicial roles
-- Structural subjects and clause openers — filters false positives from structural provisions
-- Definitional patterns — filters interpretive, scope, and legal consequence provisions
-- Era-aware additions for pre-1970 legislation — 'shall operate to', 'shall be deemed to' etc.
+## Step 3 — Candidate Vocabulary
+- Union of prescriptive cue sets (obligations, prohibitions, implied, penalty-as-obligation, rights, void, responsibility, enforcement-submit) — tuned for RECALL.
+- Non-operative / structural / clause-opener lists kept as non-blocking HINTS only.
 
-## Step 4 — Classification Architecture
-- Nine-step subject classification: recital → public body → contract nsubj → tracker → clause opener → structural → first occurrence → spaCy → tier4_default
-- Six output categories: private_actor, implied_burden, implied_burden_active, conditional_obligation, conditional_burden, public_body, ambiguous
-- Confidence flag system: high/medium/low based on classification method
-- Special rules: PENALTY_ONLY_TERMS cross-reference check, guilt cross-reference check, implied term override, Victorian obligation pre-check
+## Step 4 — Extraction Pipeline (not rule-based classification)
+- Structure-preserving, **section-anchored** CLML walk: group each provision by DOM node identity, tag `material_type`, assemble chapeau + leaves (markers preserved, **no truncation**), attach heading / section ref / definitions; flag `context_quality` honestly (full/partial).
+- Stage 1: emit **one high-recall candidate per flagged section** (a section is flagged if any cue fires anywhere in its subtree), carrying the assembled block + `leaves[]`, as JSONL + index. No labels assigned here.
 
-## Step 5 — Validation Approach
-- Line-by-line manual classification workbook — read each Act, record burden sentence with classification type
-- Compare against analyser output sentence by sentence
-- Target 150 Acts across diverse categories including Victorian/pre-war legislation
-- Each validated Act simultaneously builds classifier training data
+## Step 5 — Validation / Ground Truth
+- Line-by-line manual workbook = rubric ground truth + candidate-filter recall check + Legal-BERT seed data.
 
-## Step 6 — Classifier Development
-- Fine-tune Legal-BERT on labelled sentences from validation workbook
-- Preliminary classifier at 20 Acts — test accuracy
-- Production classifier at 150 Acts — integrate into full run pipeline
-- Active learning loop — expert review of medium-confidence cases feeds retraining
+## Step 6 — Classification (dual-model + Legal-BERT) — Stage 2, RATIFIED DESIGN, not yet built
+- Claude + Gemini independently decompose each section into a **burden-set** and classify against the rubric; agreement is **set-vs-set**; human adjudicates disagreements. The label store / version-control is set up before any real label is emitted.
+- Fine-tune Legal-BERT on the validated labels; it is the production classifier.
+- Active-learning loop: disagreements and low-confidence cases feed retraining.
 
 ## Step 7 — Full Run
-- Upload legislation.db to Google Colab (Pro — A100 GPU, High RAM)
-- Run uk_reg_colab_v5.ipynb with DB_PATH=legislation.db, STREAM=B
-- Expected runtime: 24-48 hours for 212,000 items
-- Post-run: stratified validation sample, active learning, output generation
+- Run the extraction pipeline over the locally-cached bulk XML (revised-current primary, best-collection fallback) — no crawl.
+- Legal-BERT classifies the candidate stream; stratified validation sample; output generation.
 
 ## Step 8 — Extending to Other Jurisdictions
-- Australian legislation: legislation.gov.au provides similar XML API
-- Canadian legislation: laws-lois.justice.gc.ca
-- Irish legislation: irishstatutebook.ie
-- Adapt word lists for jurisdiction-specific drafting conventions
-- EU legislative drafting uses 'are prohibited', 'is prohibited' — already in word list
+- AU (legislation.gov.au), CA (laws-lois.justice.gc.ca), IE (irishstatutebook.ie) — adapt the candidate vocabulary to jurisdiction-specific drafting; the extraction → dual-model → BERT architecture transfers.
 
-*Version 13 — May 2026. Corpus complete 212,183 rows. Six-category classification. Status filtering. Short act workbook. Replication guide. Classifier development next.*
+*Version 15 — July 2026. Architecture reframed: high-recall extraction → dual-model labelling → Legal-BERT. Extraction rebuilt to a two-stage, section-level design (section anchor DOM-keyed; Stage-1 subtree flagging; assembled chapeau+leaves, no truncation) and verified on the 7-Act set. Stage-2 labelling (burden-set per section, set-vs-set agreement) is ratified design, not yet built. Rule-based classifier retired (extraction pipeline survives). Structured XML cached locally; revised-current primary / best-collection fallback. trf upgrade, Cat 2/5 fixes, and tag migration dropped as obviated.*
