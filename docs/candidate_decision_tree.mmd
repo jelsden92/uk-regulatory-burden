@@ -23,7 +23,7 @@ flowchart TD
   N1 -->|non-operative| X_NOP["EXCLUDED: non-operative (typed: which §4 class)<br/>exec: UNALLOCATED · status: OPEN (exclusion-label schema undefined)"]:::open
   N1 -->|operative| N2
 
-  N2["N2  Operative content is a TEXTUAL AMENDMENT of another instrument?<br/>rule: notes item 4 (amendment = machinery; count at consolidated target)<br/>exec: UNALLOCATED (markup-based L4? LLM L3?); is_amendment_insertion is WRONG-GRAIN<br/>status: OPEN"]:::open
+  N2["N2  Operative content is a TEXTUAL AMENDMENT of another instrument?<br/>rule: notes item 4 (amendment = machinery; count at consolidated target) — RATIFIED<br/>exec: UNBUILT (markup-L4? LLM-L3?); is_amendment_insertion BROKEN (0/1,084 — see decision log)<br/>detect at Addition-fragment grain; fix or rename before Stage 2<br/>status: DECIDED-UNBUILT (rule decided, executor unbuilt)"]:::design
   N2 -->|yes| X_AMD["EXCLUDED: amendment machinery — burden counted at target (residence)<br/>exec: UNALLOCATED · status: OPEN (dedup vs target; editorial-backlog tail = zero-count)"]:::open
   N2 -->|no| N3
 

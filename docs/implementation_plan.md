@@ -47,6 +47,8 @@ The raw structured CLML XML is already on disk in `Bulk download/` — the DB st
 - Physical deletion of `analyser.py` + cleanup of the ~15 dependent throwaway scripts (currently retired via banner; deferred until `extract_candidates.py` is validated at scale).
 - A variant-aware, priority-resolved local file index (item_url → chosen file under the three-tier rule).
 - A small *targeted* fetch of the exhaustion-sweep gap-fillers (the ~1,082 items absent from the bulk, e.g. old ukpga) — one at a time, never a crawl.
+- **Amendment-provenance corpus-wide spot-check.** The 100% recoverability figure is test-set only (7 modern, CLML-clean Acts). Spot-check older consolidations, where amendment annotation is thinnest, before any corpus-wide provenance claim. Methodology claim until then: *"verified recoverable on the test set; corpus-wide coverage TBC."* (Decision log 2026-07-05.)
+- **PRE-STAGE-2: fix or rename `is_amendment_insertion`.** The field fires 0/1,084 (broken — detects whole-section nesting, not inline `<Addition>` fragments). The ratified §3 amendment-machinery rule needs a working detector at the `<Addition>`-fragment grain. Fix or rename before anything in Stage 2 builds on it. (Decision log 2026-07-05; `docs/decision_tree_gaps.md` G3.)
 
 # STILL RUNNING
 - The Colab API-exhaustion sweep (resumable, durable v3 checkpoint).

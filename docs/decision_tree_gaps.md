@@ -14,7 +14,7 @@
 |----|---|---|---|---|
 | G1 | N1 §4 exclusions | executor split (deterministic vs LLM) + where the drop happens | ARCH+RUBRIC | OPEN |
 | G2 | exclusion outcome | no typed "excluded" record in the burden-set schema | ARCH | OPEN ★ |
-| G3 | N2 amendment detect | `is_amendment_insertion` is wrong-grain; no amendment-provision detector | IMPL+ARCH | OPEN |
+| G3 | N2 amendment detect | §3 rule ratified, but executor unbuilt & `is_amendment_insertion` broken | IMPL+ARCH | DESIGN ✦ |
 | G4 | N2 amendment residence | policy for suppressing amending-SI candidates vs the target; backlog tail | RUBRIC+IMPL | OPEN |
 | G5 | N3 cross-ref resolve | no resolver for "under section X" / offence primary-vs-secondary | IMPL+ARCH | OPEN |
 | G6 | N4 statutory bodies | canonical statutory-bodies registry does not exist | LIST+IMPL | OPEN ✦ |
@@ -53,8 +53,8 @@ Layer 1 is deliberately high-recall and never drops (§4 signals are non-blockin
 **G2 — No typed EXCLUSION record in the schema.** `[exclusion outcome · ARCH · OPEN ★]`
 A candidate surfaced by L1 that carries no burden needs a first-class *excluded {reason}* record — for the extraction→count funnel, for audit, and as **negative training data for Legal-BERT** (the rubric §7 explicitly wants worked negatives). "Empty burden-set" and "typed exclusion" are not the same thing, and only the burden-set is specified. *Closes with:* a data-contract decision (ARCH) on how exclusions are represented and stored.
 
-**G3 — Amendment detection is wrong-grain; no amendment-*provision* detector exists.** `[N2 · IMPL+ARCH · OPEN]`
-The new §3 rule (amendment = machinery) needs to identify a provision whose *operative content* is a textual amendment. The only current signal, `is_amendment_insertion`, fires only when a whole section nests inside `<Addition>` — it flagged **0 of 1,084** candidates on the 7-Act set, because real amendments are inline fragment insertions. *Closes with:* an executor decision (markup-rule L4 vs LLM L3) and the code to detect at the right grain (IMPL).
+**G3 — Amendment detection: rule ratified, executor unbuilt, existing flag broken.** `[N2 · IMPL+ARCH · DECIDED-UNBUILT ✦]`
+The §3 amendment-machinery rule **is ratified** (amendment = machinery; count at the consolidated target), so this node is `DECIDED-UNBUILT` **at best** — the rule is decided but nothing executes it. The one field that promises the capability, `is_amendment_insertion`, is actively **broken**: `_in_amendment()` fires only when a whole section nests inside `<Addition>`, so it flagged **0 of 1,084** candidates despite 16,366 `<Addition>` nodes (real amendments are inline fragment insertions). It is logged as a bug in `project_decision_log.docx` (2026-07-05, pattern #3 Named ≠ actual — sibling of the `section_ref` "JOIN KEY" entry). **Detection must be at the `<Addition>`-fragment grain**, not the section flag. *Before Stage 2, the field is fixed or renamed so nothing builds on a false signal.* *Closes with:* the fragment-grain detector (IMPL) and an executor decision — markup-rule L4 vs LLM L3 (ARCH); the *rule* is not the gap.
 
 **G4 — Amendment residence policy is incomplete.** `[N2/spine · RUBRIC+IMPL · OPEN]`
 The rule says count the burden once, at the amended target in consolidated form. But amending SIs are themselves separate corpus items, so their amendment provisions will surface as candidates. There is no policy suppressing those so the count lands once at the target, and the legislation.gov.uk editorial backlog means a small tail of targets is not yet updated → **zero-count**. *Closes with:* a residence/suppression rule (RUBRIC) and its enforcement in the spine (IMPL). Overlaps G18.
@@ -147,7 +147,7 @@ The extractor attaches ≤8 defined terms from the same document. A classificati
 
 ## Reading of the map
 
-- **Known-unknowns confirmed (✦):** G6 (statutory-bodies list), G9 (decomposition architecture), G15 (capacity deferral), G18 (dedup policy), G19 (body↔schedule join) — all present, as the calibration note required.
+- **Known-unknowns confirmed (✦):** G3 (amendment detection at `<Addition>`-fragment grain), G6 (statutory-bodies list), G9 (decomposition architecture), G15 (capacity deferral), G18 (dedup policy), G19 (body↔schedule join) — all present, as the calibration note required.
 - **Newly surfaced (★):** G2 (exclusion-record schema), G20 (set-vs-set burden matching), G21 (review-queue taxonomy), G23 (BERT inference routing), G25 (orphan handling), G26 (EU-recital fast-path). These are the holes the diagram exposed that were not on the anticipated list — mostly at the **Layer-5 adjudication schema** and the **intake edges**, i.e. the two ends the rubric talks about least.
 - **The load-bearing decision:** G9/G11 (the decomposition architecture) sits under G2, G18, G19, G20 and the whole schema. It is the one to take first in the stage-2 session — most other ARCH gaps resolve differently depending on it.
 - **Not one gap type but four:** the map is roughly `RUBRIC ×7, ARCH ×12, LIST ×4, IMPL ×13` (with overlaps). The ARCH cluster is the stage-2 agenda proper; the IMPL cluster is downstream of it; the RUBRIC items are the project lead's to close and several (G10, G12, G15) are explicitly pilot-contingent.
