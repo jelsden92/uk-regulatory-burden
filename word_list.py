@@ -353,3 +353,96 @@ ACTIVE_COMPLIANCE_MARKERS = [
     'all reasonable steps', 'reasonable care', 'management system',
     'compliance with',
 ]
+
+# ---------------------------------------------------------------------------
+# Recall additions for the high-recall candidate filter (extract_candidates.py)
+# ---------------------------------------------------------------------------
+# These close recall HOLES the precision-tuned classifier missed. They are NOT
+# used by the legacy analyser (its PRESCRIPTIVE_WORDS is unchanged); the
+# candidate filter unions them in. The candidate filter's job is RECALL — surface
+# anything that MIGHT be a private-actor burden; the LLM+human layer rejects
+# non-operative ones. Never use these to drop.
+
+# #1 Rights / entitlements — a substantive right on a private actor creates a
+# correlative private duty (rubric §5B), a real burden. The legacy list had only
+# 4 hyper-specific 'has the right not to be…' phrases; these generalise it.
+RIGHTS_CUES = [
+    'has the right to', 'have the right to', 'has a right to', 'have a right to',
+    'is entitled to', 'are entitled to', 'shall be entitled to',
+    'has the right not to', 'have the right not to',
+]
+
+# #2 Restriction-as-prohibition — "may only X" forbids all other conduct. (The
+# general "no <noun> shall/may" pattern is handled by a regex in the filter.)
+RESTRICTION_PROHIBITION_CUES = [
+    'may only', 'shall only', 'must only', 'is not to', 'are not to',
+    'shall refrain from', 'must refrain from', 'is not entitled to', 'are not entitled to',
+]
+
+# #3 Void / contracting-out — "terms are void unless…" is a prohibition on
+# contracting out (rubric §3.4). These currently sit in DEFINITIONAL_PATTERNS and
+# are wrongly DROPPED; the candidate filter surfaces them (cue match wins).
+VOID_CUES = [
+    'is void', 'are void', 'shall be void', 'is of no effect', 'are of no effect',
+    'shall be of no effect', 'has no effect', 'have no effect',
+]
+
+# #4 Responsibility / obligation framing without shall/must.
+RESPONSIBILITY_CUES = [
+    'is responsible for', 'are responsible for', 'shall be responsible',
+    'it is the responsibility of', 'is bound to', 'are bound to',
+    'is liable for', 'are liable for',
+]
+
+# #5 Defence framing as a standalone cue — catches defences with no prove/show
+# verb (those are caught by IMPLIED_OBLIGATION_WORDS).
+DEFENCE_CUES = [
+    'it is a defence', 'it shall be a defence', 'is a defence for', 'a defence for',
+    'the burden of proof', 'burden of proof is on', 'unless he proves',
+    'unless the person shows', 'unless it is proved', 'unless it is shown',
+]
+
+# #6 Penalty-as-obligation (Victorian) — the penalty clause IS the primary
+# obligation. 'shall forfeit' was entirely absent.
+PENALTY_OBLIGATION_CUES = [
+    'shall forfeit', 'shall forfeit and pay', 'shall pay a penalty',
+    'liable to a penalty', 'shall be answerable', 'shall make good',
+]
+
+# #7 Bare passive 'is required' (no "to") — e.g. "a licence is required".
+BARE_REQUIRED_CUES = [
+    'is required', 'are required',
+]
+
+# #8 Bare 'comply with' (no "must") — list-item fragments under a parent "shall—".
+COMPLIANCE_VERB_CUES = [
+    'comply with', 'complies with', 'complied with', 'in compliance with',
+]
+
+# #9 Enforcement powers creating a correlative SUBMIT duty on a private actor
+# (rubric Cat 5 — the actor must submit when the authority acts). Recall hole:
+# these are phrased as the authority's power, but impose a private-actor burden.
+ENFORCEMENT_POWER_CUES = [
+    'stop and search', 'search and seize', 'seize and detain', 'enter and inspect',
+    'enter and search', 'may require', 'may direct', 'may seize', 'may enter',
+    'may inspect', 'may demand', 'may detain', 'board and search', 'may by notice require',
+]
+
+# #10 Leading imperative duty-verbs — list items in isolation ("(b) produce the
+# certificate…") carry their modal in the parent stem. The context parse
+# reattaches the parent ("Every employer shall— …"), but as a recall backstop for
+# context_quality=partial cases we also surface a fragment that BEGINS with one of
+# these compliance verbs. Tagged 'leading_imperative_verb' so the catch is visible.
+LEADING_DUTY_VERBS = [
+    'produce', 'permit', 'furnish', 'display', 'keep', 'maintain', 'retain',
+    'notify', 'submit', 'supply', 'deliver', 'provide', 'prepare', 'record',
+    'send', 'obtain', 'register', 'report', 'inform', 'disclose', 'declare',
+    'exhibit', 'affix', 'label', 'mark', 'post', 'pay', 'ensure', 'take',
+]
+
+# Non-blocking HINT lists (rubric: surface then human-reject; never drop). The
+# candidate filter still surfaces a sentence even if it matches one of these; the
+# match is attached as a hint flag so the LLM+human layer can weigh it.
+#   - DEFINITIONAL_PATTERNS  -> hint 'non_operative_suspect'
+#   - STRUCTURAL_SUBJECTS    -> hint 'structural_subject_suspect'
+#   - CLAUSE_OPENERS         -> hint 'clause_opener'

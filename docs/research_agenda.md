@@ -2,9 +2,19 @@
 
 **Research Agenda: Issues, Open Questions and Future Phases**
 
-_May 2026  |  Version 9 — Corpus complete; classifier development next_
+_June 2026  |  Version 10 — **Architecture reframed: extraction pipeline → dual-model labelling → Legal-BERT**_
 
-> VERSION 9 UPDATE: Corpus build complete — 212,183 rows, 99.6%+ SI coverage. Status filtering removing 639,000+ no-force elements. Short act validation workbook established with 9 Acts fully validated. Key methodological decisions formalised: penalty-as-consequence, conditional obligation scope (including regulatory inspection powers), evidence supply as part of parent obligation, nested burdens.
+> VERSION 10 UPDATE (2026-06-14 REFRAME — central change): We are **no longer fixing the rule-based classifier.** The architecture is now: a high-recall candidate-extraction pipeline (`extract_candidates.py`) surfaces candidate burden sentences with context; Claude and Gemini independently classify them against the rubric; the human lead adjudicates disagreements; the validated labels train **Legal-BERT**, the production classifier that runs the corpus. The rule-based classifier is retired *as a classifier* — only its extraction / candidate-filtering pipeline survives.
+>
+> **DROPPED / superseded by the reframe** (one line why): **trf spaCy upgrade** — only served rule-based subject resolution, replaced by Legal-BERT + LLM labelling; **Cat 2 / Cat 5 classifier fixes** — the filter only surfaces, the LLM+human layer assigns category; **`private_actor`→`direct_burden` tag migration** — rule-based output retired, nothing to migrate (rubric tags become the label schema).
+>
+> **RESOLVED**: the structured CLML XML is cached locally in `Bulk download/` (~98%+ corpus coverage) — **no 69k crawl is needed, ever.** Parsing source priority is **revised-current PRIMARY, best-collection FALLBACK** (this reversed an earlier "best-collection only" conclusion: BC serves stale *as-made* text for thousands of amended SIs and lacks 7 in-force retained-EU items present only in revised-current).
+>
+> **LIVE NEXT STEPS**: repoint `extract_candidates.py` to read the local bulk downloads (revised-current primary, BC fallback, variants read from files not the stale `best_collection_index.json`); hold the cue inventory / high-recall discipline as the measurement ceiling; dual-model labelling + human-adjudication workflow; build validated training data toward Legal-BERT; **rubric v2 awaiting the project lead's full sign-off before it is authoritative**; deferred line-by-line calibration reads once the pipeline is stable.
+>
+> **QUEUED FOR LATER (corpus-run-time, not now)**: physical `analyser.py` deletion + dependent-script cleanup (currently retired via banner); a variant-aware, priority-resolved local file index; a small *targeted* fetch of the exhaustion-sweep gap-fillers (~1,082 bulk-absent items, one at a time). **STILL RUNNING**: the Colab API-exhaustion sweep.
+>
+> Corpus state (unchanged): 212,183 rows, 69,462 distinct in-force items, 99.6%+ SI coverage, status filtering removing 639,000+ no-force elements. Short-act validation workbook established. Methodological decisions formalised: penalty-as-consequence, the Cat 2 (organic trigger) vs Cat 5 (external-authority trigger) split, evidence supply as part of parent obligation, nested burdens, licence-to-operate as Direct.
 
 # PART 1 — Novel Contributions
 
@@ -29,7 +39,7 @@ _May 2026  |  Version 9 — Corpus complete; classifier development next_
 | Best Collection bulk download | 63,536 | Filled enacted-only SIs |
 | Missing SI fill (uksi/ssi/nisr/wsi) | 54,484 | uksi 11% → 99.6% |
 | UnknownStatusPDFOnly | 14,895 | 20,262 items with XML despite PDF label |
-| InForce1991 | 2,793 | Pre-Statute Law Database era legislation |
+| InForce1991 | 2,793 | In force at the 1 Feb 1991 *Statutes in Force* base date (the foundation of the Statute Law Database); 6,892 such items in the universe, 2,793 ingested here |
 | JurisdictionLimited | 2,931 | Items in force in some jurisdictions only |
 | Retry sweep | 546 | Partial recovery of network failures |
 | Total | 212,183 | 99.6%+ modern SIs; 100% post-1990 Acts |
@@ -64,13 +74,19 @@ The classifier needs training examples from Victorian and pre-war legislation to
 - Celluloid and Cinematograph Film Act 1922 — fire safety obligations
 - Conspiracy and Protection of Property Act 1875 — industrial relations
 
-# PART 4 — Classifier Development
+# PART 4 — Classifier Development (REFRAMED)
 
-| Phase | Training data | Target | Status |
+The classifier is no longer the rule-based analyser. Pipeline: **high-recall extraction → dual-model (Claude + Gemini) labelling against the rubric → human adjudication of disagreements → Legal-BERT trained on the validated labels (production).** The candidate filter's recall is the ceiling for both training data and production — a dropped candidate is an uncorrectable silent false negative — so recall discipline (the `word_list` cue union, audited empirically against ground truth) is the measurement ceiling.
+
+| Phase | Input | Target | Status |
 | --- | --- | --- | --- |
-| Preliminary | ~20 Acts validated | Test accuracy on held-out Acts | Next — after 20 Acts complete |
-| Production | ~50 Acts validated | Full run pipeline integration | ~4-6 weeks |
-| Active learning | Medium-confidence cases reviewed | 94-96% accuracy | Post-run |
+| Extraction pipeline | locally-cached bulk XML | high-recall candidate JSONL + context | `extract_candidates.py` built; **repoint to local bulk next** |
+| Dual-model labelling | candidate sentences + rubric | independent Claude/Gemini labels; disagreements → review | workflow to operationalise |
+| Human adjudication | disagreement + hard-case queue | validated training labels | ongoing via workbook + rubric |
+| Legal-BERT (production) | validated labels | fine-tuned classifier runs the corpus | after sufficient labelled data |
+| Active learning | low-confidence / disagreement cases | iterative accuracy gains | post-initial-train |
+
+> PRELIMINARY (not established): a preliminary read indicated the *retired* rule-based analyser over-identified private-actor obligations; the precise rate awaits a larger randomised unflagged sample and must be treated as a preliminary finding, not a published figure. It is part of the rationale for the reframe, not a result.
 
 # PART 5 — Future Phases
 - Phase 2 — Regulatory rulebooks (FCA Handbook, PRA Rulebook)

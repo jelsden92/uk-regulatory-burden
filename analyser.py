@@ -3,11 +3,32 @@ analyser.py — Local prescriptive requirement analyser
 Usage: python analyser.py --stream <A|B|C>
 
 Zero AI API calls — pure Python + local spaCy only.
+
+============================================================================
+RETIRED (2026-06-14) — CLASSIFICATION LAYER NO LONGER THE PIPELINE.
+----------------------------------------------------------------------------
+The rule-based CLASSIFICATION here (subject resolution via classify_subject_spacy,
+the category heuristics find_conditional_burden / find_implied_obligation, the
+classify_polarity proposer, and the counting/aggregation in analyse_item) is
+RETIRED. Per the project reframe, the production classifier is Legal-BERT
+(fine-tuned); training labels come from the LLM+human layer reading the rubric.
+
+The replacement pipeline is `extract_candidates.py`, which reuses
+`downloader.parse_xml`'s ingest + CLML status filter and the `word_list`
+vocabulary to emit high-recall candidate sentences (+ context) for labelling.
+
+This file is kept ONLY because several throwaway analysis scripts still import
+its helpers; it is no longer on the path to the corpus measure. Do not extend
+the classification logic. Physical deletion (and cleanup of the dependent
+scripts: test_run.py, _run_13act_benchmark.py, regression_check.py, the _tna_*
+scripts, etc.) follows once extract_candidates.py is validated at corpus scale.
+============================================================================
 """
 
 import argparse
 import hashlib
 import logging
+import os
 import re
 import sqlite3
 import unicodedata
@@ -38,6 +59,18 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)s %(message)s',
 )
+
+# ---------------------------------------------------------------------------
+# spaCy model — single source of truth (was hard-coded en_core_web_sm here,
+# en_core_web_trf in the Colab sync, en_core_web_lg in the notebook generator;
+# that drift meant the validated local outputs were produced by the weak sm
+# parser while the full corpus run used trf). All entry points now read this
+# one constant. Default is the transformer model (trf): markedly stronger
+# dependency parse on long legislative sentences, which is what the spaCy
+# subject-resolution fallback in classify_subject_spacy relies on. Override for
+# a fast/light run with:  SPACY_MODEL=en_core_web_sm python ...
+# ---------------------------------------------------------------------------
+SPACY_MODEL = os.environ.get('SPACY_MODEL', 'en_core_web_trf')
 
 # ---------------------------------------------------------------------------
 # Database setup
@@ -92,6 +125,7 @@ CREATE TABLE IF NOT EXISTS sentences (
     subject_source          TEXT,
     is_amendment_insertion  INTEGER DEFAULT 0,
     confidence_flag         TEXT,
+    polarity                TEXT,
     FOREIGN KEY (legislation_id) REFERENCES legislation(id)
 )
 """
@@ -104,6 +138,8 @@ CREATE TABLE IF NOT EXISTS ambiguous_review (
     matched_word    TEXT,
     is_in_schedule  INTEGER,
     subject_source  TEXT,
+    polarity        TEXT,
+    review_reason   TEXT,
     FOREIGN KEY (legislation_id) REFERENCES legislation(id)
 )
 """
@@ -143,6 +179,19 @@ def init_db(conn):
         pass
     try:
         conn.execute("ALTER TABLE results ADD COLUMN low_confidence_count INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
+    # Polarity (proposed operative-requirement label: obligation/prohibition/review)
+    try:
+        conn.execute("ALTER TABLE sentences ADD COLUMN polarity TEXT")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        conn.execute("ALTER TABLE ambiguous_review ADD COLUMN polarity TEXT")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        conn.execute("ALTER TABLE ambiguous_review ADD COLUMN review_reason TEXT")
     except sqlite3.OperationalError:
         pass
     conn.commit()
@@ -524,7 +573,8 @@ _nlp = None
 def get_nlp():
     global _nlp
     if _nlp is None:
-        _nlp = spacy.load('en_core_web_sm')
+        _nlp = spacy.load(SPACY_MODEL)
+        logging.info(f'spaCy model loaded: {SPACY_MODEL}')
     return _nlp
 
 
@@ -646,6 +696,126 @@ def classify_subject_spacy(sentence, tracker_result, tracker_source):
     # Returns 'tier4_default' (not 'direct') so callers can detect this path
     # and suppress it for POSITIVE_ID_REQUIRED_TERMS.
     return 'private_actor', 'tier4_default', 'medium'
+
+# ---------------------------------------------------------------------------
+# Step 8b — Polarity (PROPOSED operative-requirement label)
+# ---------------------------------------------------------------------------
+# Polarity classifies the OPERATIVE REQUIREMENT the provision places on the
+# actor, orthogonally to the six burden categories:
+#   'obligation'  — the actor is required to ACT (do/provide/maintain/ensure …)
+#   'prohibition' — the actor is required to REFRAIN (not do X / X is an offence)
+#   'review'      — genuinely ambiguous AFTER the operative-requirement rule
+#                   (e.g. a clause inseparably imposing both a positive duty and
+#                   a prohibition, or where the operative requirement is unclear)
+#
+# IMPORTANT — this is a PROPOSED label, not ground truth. It is a deliberately
+# transparent verb/marker heuristic that WILL mis-handle the hard cases (a
+# negative that is really a positive obligation; criminalisation that is really
+# a prohibition). It exists to be cross-checked by the LLMs and adjudicated by
+# the researcher, exactly like the category labels. 'review' is NOT a dumping
+# ground for mild uncertainty — it is reserved for genuine post-rule ambiguity,
+# and 'review' rows route to the same human-adjudication queue as ambiguous
+# category labels. Order of tests below encodes the rule's precedence; the two
+# edge cases the rubric calls out explicitly are handled FIRST so they cannot be
+# captured by the cruder negative/offence markers:
+#   - "must ensure X does not happen" → obligation (it requires positive action)
+#   - "is guilty of an offence if he markets…" → prohibition (refrain), BUT
+#     "guilty of an offence if he fails to notify" → obligation (the operative
+#     requirement is to act; the offence punishes the omission).
+
+# Offence triggered by an OMISSION → the operative requirement is to act.
+_POL_OMISSION_RE = re.compile(
+    r'\b(?:fails?\s+to|failure\s+to|fail\s+to|neglects?\s+to|neglect\s+to|'
+    r'omits?\s+to|omit\s+to|refuses?\s+to)\b', re.IGNORECASE)
+# Positive action verbs that WRAP a negative ("ensure … does not"): still a duty
+# to act, so obligation wins over any embedded 'not'.
+_POL_POSITIVE_WRAP_RE = re.compile(
+    r'\b(?:ensure|ensures|ensuring|secure|secures|securing|guarantee|guarantees|'
+    r'make\s+sure|made\s+sure|see\s+to\s+it|take[ns]?\s+(?:all\s+)?(?:reasonable\s+|'
+    r'such\s+)?(?:steps|measures|precautions)|took\s+(?:all\s+)?(?:reasonable\s+|'
+    r'such\s+)?(?:steps|measures|precautions))\b', re.IGNORECASE)
+# Explicit prohibition markers (refrain).
+_POL_PROHIBITION_RE = re.compile(
+    r'\b(?:shall\s+not|must\s+not|may\s+not|is\s+not\s+to|are\s+not\s+to|'
+    r'shall\s+refrain|must\s+refrain|is\s+prohibited|are\s+prohibited|'
+    r'prohibited\s+from|no\s+person\s+(?:shall|may|is\s+to)|'
+    r'it\s+is\s+(?:an\s+offence|unlawful)\s+(?:to|for))\b', re.IGNORECASE)
+# Offence-creation framing (operative requirement is to refrain, unless it is an
+# omission offence — handled by _POL_OMISSION_RE first).
+_POL_OFFENCE_RE = re.compile(
+    r'\b(?:guilty\s+of\s+an?\s+offence|commits?\s+an?\s+offence|'
+    r'is\s+an\s+offence|shall\s+be\s+guilty|guilty\s+of\s+a\s+(?:misdemeanour|felony))\b',
+    re.IGNORECASE)
+# Positive obligation markers (act).
+_POL_OBLIGATION_RE = re.compile(
+    r'\b(?:shall|must|is\s+required\s+to|are\s+required\s+to|is\s+to|are\s+to|'
+    r'is\s+under\s+a\s+duty|are\s+under\s+a\s+duty|has\s+a\s+duty|have\s+a\s+duty|'
+    r'it\s+is\s+the\s+duty|it\s+shall\s+be\s+the\s+duty|owes?\s+(?:a\s+|the\s+)?duty|'
+    r'is\s+liable\s+to|shall\s+be\s+liable|there\s+is\s+implied|'
+    r'there\s+shall\s+be\s+implied|it\s+is\s+an\s+implied\s+term|'
+    r'is\s+subject\s+to\s+a\s+duty|compl(?:y|ies|ied)\s+with|'
+    r'in\s+accordance\s+with)\b', re.IGNORECASE)
+# Active "require/requiring <someone> to <act>" — places a duty to act on the
+# named party (e.g. "may require the organisation to supply …").
+_POL_REQUIRE_TO_RE = re.compile(
+    r'\brequir(?:e|es|ed|ing)\s+(?:\w+\s+){1,4}?to\b', re.IGNORECASE)
+
+
+def classify_polarity(sentence, matched_word=None, classification=None):
+    """Propose an operative-requirement polarity for a prescriptive sentence.
+
+    Returns 'obligation' | 'prohibition' | 'review'. PROPOSED label only — see
+    the section comment above. Precedence is deliberate: the two rubric edge
+    cases are tested before the blunt negative/offence markers.
+
+    `classification` is used only as a backstop: an implied burden is, by the
+    rubric's own definition (§3.3 — a standing obligation to maintain evidence /
+    compliance, revealed through defence framing), an obligation even though its
+    surface form ('it is a defence to prove …') carries no obligation verb. So a
+    sentence that would otherwise fall to 'review' resolves to 'obligation' when
+    its category already establishes a standing duty. A prohibition marker, if
+    present, still wins (it is detected before this backstop is reached)."""
+    s = _LEADING_SECTION_NUM.sub('', sentence or '').strip()
+
+    # (1) Omission-triggered duty (incl. omission offences) → obligation.
+    #     "fails to notify", "guilty of an offence if he fails to comply".
+    if _POL_OMISSION_RE.search(s):
+        return 'obligation'
+
+    # (2) Positive action wrapping a negative → obligation.
+    #     "must ensure that X does not happen" / "take all reasonable steps".
+    if _POL_POSITIVE_WRAP_RE.search(s):
+        return 'obligation'
+
+    # (3) Explicit prohibition markers → prohibition. "shall not", "no person may".
+    if _POL_PROHIBITION_RE.search(s):
+        return 'prohibition'
+
+    # (4) Offence-as-obligation: an offence-creation clause whose conduct is an
+    #     action (omission offences already returned at step 1) → prohibition.
+    if _POL_OFFENCE_RE.search(s):
+        return 'prohibition'
+
+    # (5) Positive obligation markers → obligation.
+    if _POL_OBLIGATION_RE.search(s) or _POL_REQUIRE_TO_RE.search(s):
+        return 'obligation'
+
+    # (6) The matched prescriptive word can still carry the modality even when no
+    #     marker fired on the surface form (e.g. an OCR-normalised variant).
+    mw = (matched_word or '').lower()
+    if mw:
+        if 'not' in mw or 'prohibit' in mw or 'refrain' in mw:
+            return 'prohibition'
+        if mw in ('shall', 'must', 'is to', 'are to') or 'duty' in mw or 'required' in mw:
+            return 'obligation'
+
+    # (7) Category backstop: an implied burden is a standing obligation by
+    #     definition (§3.3), so it is an obligation even with no surface verb.
+    if classification in ('implied_burden', 'implied_burden_active'):
+        return 'obligation'
+
+    # (8) No determinable operative requirement → genuine post-rule ambiguity.
+    return 'review'
 
 # ---------------------------------------------------------------------------
 # Word counting
@@ -856,7 +1026,19 @@ def analyse_item(conn, leg_row, stream):
             subject_source = 'penalty_only'
             confidence_flag = 'medium'
         elif is_conditional:
-            # Anti-avoidance conditional — classify without subject detection
+            # Anti-avoidance conditional — classify without subject detection.
+            #
+            # NOTE (licence-to-operate rule, methodology §3.2): the standing
+            # requirement to HOLD or MAINTAIN a licence/permit/authorisation in
+            # order to operate is a DIRECT burden, never conditional. Such
+            # provisions ("shall not carry on … unless authorised", "must hold a
+            # licence", "the holder shall maintain the licence in force") match a
+            # prescriptive term and are routed through the normal subject path
+            # below, landing as private_actor/direct. find_conditional_burden
+            # fires only on purpose-clause anti-avoidance ('is to'/'are to'), so
+            # licence-grant phrasing is NOT a conditional trigger. Do not add a
+            # 'where a licence is in force' / 'if a licence has been granted'
+            # trigger here — that would misclassify the licence-to-operate burden.
             classification = 'conditional_burden'
             subject_source = 'conditional'
             confidence_flag = 'high'
@@ -924,6 +1106,11 @@ def analyse_item(conn, leg_row, stream):
         else:
             medium_confidence_count += 1
 
+        # Polarity — PROPOSED operative-requirement label, across all six
+        # categories. Not ground truth: cross-checked by the LLMs and adjudicated
+        # by the researcher, like the category label itself.
+        polarity = classify_polarity(sentence, matched_word, classification)
+
         sentence_rows.append({
             'legislation_id': leg_id,
             'sentence_text': sentence[:2000],
@@ -934,6 +1121,7 @@ def analyse_item(conn, leg_row, stream):
             'subject_source': subject_source,
             'is_amendment_insertion': int(is_amendment),
             'confidence_flag': confidence_flag,
+            'polarity': polarity,
         })
 
         if classification == 'private_actor':
@@ -946,12 +1134,28 @@ def analyse_item(conn, leg_row, stream):
             pass  # counted in their own accumulators above
         else:
             ambiguous_count += 1
+
+        # Human-adjudication queue: a category-ambiguous label OR an unresolved
+        # polarity ('review') both route here, tagged with which one triggered it.
+        if classification == 'ambiguous':
             ambiguous_rows.append({
                 'legislation_id': leg_id,
                 'sentence_text': sentence[:2000],
                 'matched_word': matched_word,
                 'is_in_schedule': int(is_in_schedule),
                 'subject_source': subject_source,
+                'polarity': polarity,
+                'review_reason': 'ambiguous_category',
+            })
+        elif polarity == 'review':
+            ambiguous_rows.append({
+                'legislation_id': leg_id,
+                'sentence_text': sentence[:2000],
+                'matched_word': matched_word,
+                'is_in_schedule': int(is_in_schedule),
+                'subject_source': subject_source,
+                'polarity': polarity,
+                'review_reason': 'polarity_review',
             })
 
     # Density = private_actor per 1000 words
@@ -1010,19 +1214,19 @@ def analyse_item(conn, leg_row, stream):
         INSERT INTO sentences (
             legislation_id, sentence_text, matched_word, classification,
             is_in_schedule, sentence_hash, subject_source, is_amendment_insertion,
-            confidence_flag
+            confidence_flag, polarity
         ) VALUES (:legislation_id, :sentence_text, :matched_word, :classification,
                   :is_in_schedule, :sentence_hash, :subject_source, :is_amendment_insertion,
-                  :confidence_flag)
+                  :confidence_flag, :polarity)
     """, sentence_rows)
 
     # Step 12 — save ambiguous
     conn.executemany("""
         INSERT INTO ambiguous_review (
             legislation_id, sentence_text, matched_word,
-            is_in_schedule, subject_source
+            is_in_schedule, subject_source, polarity, review_reason
         ) VALUES (:legislation_id, :sentence_text, :matched_word,
-                  :is_in_schedule, :subject_source)
+                  :is_in_schedule, :subject_source, :polarity, :review_reason)
     """, ambiguous_rows)
 
     conn.commit()
