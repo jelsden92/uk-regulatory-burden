@@ -1,0 +1,77 @@
+%% UK Regulatory Burden — Diagram 2: Per-candidate decision tree (logic view / gap-finder)
+%% The full logical path ONE candidate section walks: raw assembled text →
+%%   N burdens (each with category/polarity/obligated_party/actor_capacity/provenance)
+%%   OR excluded-with-typed-reason OR routed-to-review.
+%% Every decision node is annotated (MANDATORY):  rule (source) · exec (executor) · status.
+%%   exec = L1/L2 rule · L3 model · L4 lookup · L5 human · or UNALLOCATED.
+%%   status = BUILT (DECIDED-BUILT) / DESIGN (DECIDED-UNBUILT) / OPEN.
+%% Sources: rubric v2.2 (§1-§7), rubric_revision_notes.md (items 4-9), implementation_plan.md.
+%% Companion: pipeline_architecture.mmd (systems view); decision_tree_gaps.md (deliverable).
+%% NB: nearly the whole tree is OPEN/DESIGN — Stage-2 is ratified design, not built. Only L1 intake is BUILT.
+
+flowchart TD
+
+  IN["INTAKE: assembled section block + leaves[] + hints (per candidate)<br/>rule: §Extraction unit — one record per flagged section<br/>exec: L1 · status: BUILT"]:::built
+  RECALL["UPSTREAM GATE: a section with NO cue anywhere is never surfaced<br/>rule: Stage-1 recall gate (word_list union = the ceiling)<br/>exec: L1 · status: OPEN (silent FN risk; only control is recall audit vs ground truth)"]:::open
+  ORPH["SIDE BRANCH: orphan / context_quality=partial candidates<br/>(per-sentence, n_leaves=0) bypass the unit rule<br/>exec: UNALLOCATED · status: OPEN (unhandled downstream)"]:::open
+  IN -.->|precondition| RECALL
+  IN -.->|edge material| ORPH
+
+  IN --> N1
+
+  N1["N1  OPERATIVE? binds an obligation/prohibition (not deem/define/enable)<br/>rule: §4 non-operative exclusions<br/>exec: UNALLOCATED (L2 deterministic vs L3 LLM split undecided)<br/>status: OPEN"]:::open
+  N1 -->|non-operative| X_NOP["EXCLUDED: non-operative (typed: which §4 class)<br/>exec: UNALLOCATED · status: OPEN (exclusion-label schema undefined)"]:::open
+  N1 -->|operative| N2
+
+  N2["N2  Operative content is a TEXTUAL AMENDMENT of another instrument?<br/>rule: notes item 4 (amendment = machinery; count at consolidated target)<br/>exec: UNALLOCATED (markup-based L4? LLM L3?); is_amendment_insertion is WRONG-GRAIN<br/>status: OPEN"]:::open
+  N2 -->|yes| X_AMD["EXCLUDED: amendment machinery — burden counted at target (residence)<br/>exec: UNALLOCATED · status: OPEN (dedup vs target; editorial-backlog tail = zero-count)"]:::open
+  N2 -->|no| N3
+
+  N3["N3  POINTER / HOOK / CROSS-REFERENCE only? (burden defined elsewhere)<br/>rule: §3 count-at-source; compliance/contravention hooks; enabling powers; penalty-as-consequence;<br/>offence primary-statement vs secondary-cross-ref<br/>exec: UNALLOCATED (L2 pattern + referenced-provision resolution — not built)<br/>status: OPEN"]:::open
+  N3 -->|reference only| X_PTR["EXCLUDED: counted at source<br/>exec: UNALLOCATED · status: OPEN (cross-ref/offence-target join not built)"]:::open
+  N3 -->|carries its own burden| N4
+
+  N4["N4  Burden falls on a PRIVATE ACTOR?<br/>rule: §1/§5C statutory-source function test (statutory=public / contractual=private; funding-irrelevant)<br/>exec: UNALLOCATED — needs a statutory-bodies REGISTRY (does not exist); keyword lists exist but UNWIRED<br/>status: OPEN"]:::open
+  N4 -->|public body / no one| X_PUB["EXCLUDED: public-body / falls-on-no-one<br/>(levy duties on private firms still COUNT)<br/>exec: UNALLOCATED · status: OPEN"]:::open
+  N4 -->|genuinely mixed / hybrid| REVIEW
+  N4 -->|private actor| N5
+
+  N5["N5  DECOMPOSE into burden UNITS<br/>rule: §1 unit rule — obligation-leaf = count each; condition/factor-leaf = count once; span-merge across candidates<br/>exec: UNALLOCATED — THE Layer-3 architecture question (per-candidate / counting-head / BIO-tag / decompose-then-classify)<br/>status: OPEN (burden-vs-condition discriminator not empirically tested — §7 item 3)"]:::open
+  N5 -->|leaf genuinely un-callable| REVIEW
+  N5 -->|N burden units| PB
+
+  PB["FOR EACH burden unit → N6..N10"]:::design
+
+  PB --> N6
+  N6["N6  CATEGORY 1-6<br/>rule: §2 six categories; Cat2-vs-Cat5 trigger-control; DEFENCE-DOMINANCE → IB/IBA (notes item 7); Cat6→review<br/>exec: L3 dual-model (Claude+Gemini) → L5 human on disagreement<br/>status: DESIGN (defence-dominance = new simplification, pilot-contingent)"]:::design
+  N6 -->|Cat 6 ambiguous| REVIEW
+  N6 -->|category assigned| N7
+
+  N7["N7  POLARITY — obligation / prohibition / review<br/>rule: §2A operative-requirement rule + edge cases; defence-revealed polarity = underlying standard (notes item 9)<br/>exec: L3 dual-model cross-checked → L5 human<br/>status: DESIGN (review-threshold discipline §7 item 9 not operationalised)"]:::design
+  N7 -->|review| REVIEW
+  N7 -->|polarity assigned| N8
+
+  N8["N8  OBLIGATED PARTY — actual burdened party, not grammatical subject<br/>rule: §5B re-attribution; schema field obligated_party<br/>exec: L3/L4<br/>status: DESIGN (no controlled party vocabulary → capacity + dedup unstable)"]:::design
+  N8 --> N9
+
+  N9["N9  ACTOR CAPACITY — economic / personal / both-either / ambiguous<br/>rule: §1 + notes item 8 — classify the ACTIVITY not the subject; scheme-splits→follow-scheme;<br/>both/either needs POSITIVE 'binds identically either way'; else ambiguous (generous default)<br/>exec: UNALLOCATED — phase-1 generous default; boundary resolution deferred to phase 2/3<br/>status: OPEN (deferred; activity-profile rule new/untested; both/either reporting-line needs schema)"]:::open
+  N9 --> N10
+
+  N10["N10  PROVENANCE — introduced_by / introduced_year (nullable)<br/>rule: notes item 5 — residence (count) vs provenance (growth) split<br/>exec: UNALLOCATED — L4 Citation resolver (Addition→Commentary→Citation, ~100% recoverable) NOT built<br/>status: OPEN (fragment-grain, not is_amendment_insertion; multi-instrument sections)"]:::open
+  N10 --> EMIT
+
+  EMIT["EMIT BURDEN {category, polarity, obligated_party, actor_capacity, provenance}<br/>exec: L5 label store · status: OPEN (label store / version-control not built)"]:::open
+  EMIT --> SPINE
+
+  REVIEW["ROUTE TO REVIEW (Layer 5) — 4 axes converge:<br/>hybrid-actor / ambiguous-leaf / Cat6 / polarity-review / model-disagreement<br/>exec: L5 human · status: OPEN (queue taxonomy + set-vs-set burden-matching undefined)"]:::open
+
+  SPINE["COUNTING SPINE: burden-count per candidate + grouping across candidates<br/>+ cross-instrument dedup (no policy; vs intentional devolution dupes) + body↔schedule join (none)<br/>→ headline total + economic FLOOR (economic-only; both/either own line)<br/>status: OPEN"]:::open
+
+  classDef built fill:#1b5e20,stroke:#0d3311,color:#ffffff;
+  classDef design fill:#8a6d00,stroke:#5a4700,color:#ffffff;
+  classDef open fill:#8e1c1c,stroke:#5c0f0f,color:#ffffff;
+
+  legB["BUILT"]:::built
+  legD["DESIGN (DECIDED-UNBUILT)"]:::design
+  legO["OPEN (gap)"]:::open
+  legB ~~~ legD ~~~ legO

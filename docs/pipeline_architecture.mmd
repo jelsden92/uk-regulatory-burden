@@ -1,0 +1,93 @@
+%% UK Regulatory Burden — Diagram 1: Pipeline Architecture (systems view)
+%% Component view: what processes what, in what order.
+%% Source model: the layered flow (L0-L5 + counting spine + feedback loops) from the
+%%   methodology reframe (implementation_plan.md, extraction_verification_report.md) and
+%%   the rubric v2.2 + rubric_revision_notes.md (items 4-9).
+%% Companion: candidate_decision_tree.mmd (logic view) and decision_tree_gaps.md (deliverable).
+%%
+%% STATUS COLOURING (a flowchart's vice is making everything look equally settled):
+%%   built  = DECIDED-BUILT   (code exists and is verified)
+%%   design = DECIDED-UNBUILT (rule/design ratified, no executor built)
+%%   open   = OPEN            (rule vague, executor unallocated, or required data absent)
+%% See decision_tree_gaps.md for the per-node gap characterisation.
+
+flowchart TD
+
+  subgraph L0["Layer 0 — Corpus & metadata"]
+    L0a["legislation.db (212,183 rows; 69,462 in-force Tier 1)"]:::built
+    L0b["Bulk XML cache 'Bulk download/'<br/>revised-current PRIMARY / best-collection FALLBACK<br/>(pipeline still fetches /data.xml live — repoint pending)"]:::open
+    L0c["InForce manifest + na_inforce flag; three-tier digitisation"]:::built
+    L0d["Status filtering — strip_no_force_provisions()<br/>Prospective/Repealed/Dead/Discarded"]:::built
+  end
+
+  subgraph L1["Layer 1 — Sectioning / extraction / Stage-1 flagging"]
+    L1a["extract_candidates.py: DOM-keyed section anchor<br/>outermost P-level UNION innermost numbered Division/Para<br/>material_type = uk_body/uk_schedule/eu_article/eu_recital/orphan"]:::built
+    L1b["Assemble chapeau + leaves[] (markers preserved, NO truncation)<br/>attach heading / section_ref / definitions / context_quality"]:::built
+    L1c["Stage-1 recall gate: flag section if ≥1 cue fires in subtree<br/>(word_list union; high-recall, never drops)"]:::built
+    L1d["HINTS only (non-blocking): candidate_cue, is_in_schedule,<br/>is_amendment_insertion, hint_flags"]:::built
+    L1out[("candidates.jsonl — one record per flagged section")]:::built
+  end
+
+  subgraph L2["Layer 2 — Structural rules (executor contested)"]
+    L2a["Non-operative exclusions (rubric §4): deeming, definitional,<br/>machinery, powers-to-make-2ndary, scheme-machinery, list-of-contents"]:::open
+    L2b["Count-at-source (rubric §3): cross-refs, compliance/contravention hooks,<br/>enabling powers, penalty-as-consequence, offence primary-vs-secondary"]:::open
+    L2c["Amendment = machinery, not a burden (notes item 4)<br/>count at consolidated target"]:::open
+    L2d["List-of-requirements vs list-of-contents (rubric §5A)"]:::open
+  end
+
+  subgraph L3["Layer 3 — Burden decomposition & classification (dual-model; NOT built)"]
+    L3a["Decompose section into burden UNITS (rubric §1 unit rule)<br/>obligation-leaf vs condition/factor-leaf; span-merge; ambiguous-leaf→review<br/>** architecture undecided: per-candidate / counting-head / BIO / decompose-then-classify **"]:::open
+    L3b["Category — six categories (rubric §2)<br/>trigger-control discriminator; defence-dominance precedence (notes item 7)"]:::design
+    L3c["Polarity — obligation/prohibition/review (rubric §2A)<br/>operative-requirement rule; defence-revealed polarity (notes item 9)"]:::design
+    L3d["Claude + Gemini classify independently against the rubric"]:::design
+  end
+
+  subgraph L4["Layer 4 — Attribution & verification rules"]
+    L4a["Obligated party (rubric §5B) — record burdened party, not grammatical subject"]:::design
+    L4b["Private vs public — statutory-source function test (rubric §5C); hybrid→review<br/>needs a statutory-bodies REGISTRY (does not exist; keyword lists only, unwired)"]:::open
+    L4c["Context-dependent terms (rubric §5D) — per-Act definition resolution"]:::open
+    L4d["Actor capacity (rubric §1 + notes item 8) — activity-profile rule;<br/>boundary deferred to phase 2/3; generous-ambiguous default"]:::open
+    L4e["Provenance — introduced_by/introduced_year (notes item 5)<br/>Addition→Commentary→Citation (~100% recoverable); resolver NOT built"]:::open
+    L4f["TNA cross-check — external validation input (section-level)"]:::design
+  end
+
+  subgraph L5["Layer 5 — Adjudication & review"]
+    L5a["Set-vs-set agreement (same count, same per-burden labels)<br/>burden-matching across differing sets = undefined"]:::open
+    L5b["Review queue — typed reasons across 4 axes (category/polarity/capacity/actor)<br/>queue taxonomy undefined"]:::open
+    L5c["Human lead adjudicates disagreements against the rubric"]:::design
+    L5d["Label store / version-control (established before any real label)"]:::design
+  end
+
+  SPINE["COUNTING SPINE (consumes L2-L4)<br/>burden-count per candidate + grouping across candidates<br/>cross-instrument dedup (no policy) · body↔schedule join (none)<br/>→ headline total + economic FLOOR (economic-only; both/either own line)"]:::open
+
+  BERT["Legal-BERT — production classifier (trained from L5 labels; runs full corpus)<br/>cannot emit per-section multiplicity → open architecture question"]:::design
+
+  %% ---- main flow ----
+  L0 --> L1
+  L1out --> L2
+  L2 --> L3
+  L3 --> L4
+  L4 --> L5
+  L2 --> SPINE
+  L3 --> SPINE
+  L4 --> SPINE
+  L5d --> BERT
+  BERT -->|classifies corpus| SPINE
+
+  %% ---- feedback loops ----
+  L5c -.->|adjudications → training data| BERT
+  L5c -.->|new bodies discovered| L4b
+  L5c -.->|new formulations → cue patterns + rare-class retrieval| L1c
+  L5c -.->|new formulations → structural patterns| L2a
+  L5c -.->|rubric revisions| L2
+  L5c -.->|rubric revisions| L3
+
+  classDef built fill:#1b5e20,stroke:#0d3311,color:#ffffff;
+  classDef design fill:#8a6d00,stroke:#5a4700,color:#ffffff;
+  classDef open fill:#8e1c1c,stroke:#5c0f0f,color:#ffffff;
+
+  %% Legend
+  legB["DECIDED-BUILT"]:::built
+  legD["DECIDED-UNBUILT (design ratified)"]:::design
+  legO["OPEN (gap — see decision_tree_gaps.md)"]:::open
+  legB ~~~ legD ~~~ legO
