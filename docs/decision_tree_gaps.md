@@ -1,6 +1,6 @@
 # Decision-Tree Gap List — agenda for the stage-2 design session
 
-**Date:** 2026-07-05 · **Status:** mapping exercise only — nothing resolved here.
+**Date:** 2026-07-05 · **Status:** mapping exercise; **triage in progress (2026-07-06)** — as rules are ratified, entries flip `OPEN → DECIDED-UNBUILT` and the residual (executor/impl) moves to the stage-2 agenda. Reclassified so far: **G1, G5** (rule settled, executor-allocation only); **G25** (orphan-triage lane ratified); **G2** (typed-exclusion schema ratified). Further items pending.
 **Companions:** `pipeline_architecture.mmd` (systems view), `candidate_decision_tree.mmd` (logic view).
 **Method:** every decision node in the per-candidate tree was annotated `rule · executor · status`; this is the flat list of every node where the **rule is missing/vague**, the **executor is unallocated**, or the **required data/implementation does not exist**. Each entry says *what is missing* and *what kind of decision closes it* — it does **not** propose the answer.
 
@@ -13,7 +13,7 @@
 | ID | Node / layer | What's undecided | Closes with | Status |
 |----|---|---|---|---|
 | G1 | N1 §4 exclusions | rule (§4 list) SETTLED; residual = executor allocation (deterministic vs LLM) + where the drop happens | ARCH+RUBRIC | DESIGN |
-| G2 | exclusion outcome | no typed "excluded" record in the burden-set schema | ARCH | OPEN ★ |
+| G2 | exclusion outcome | RATIFIED: fine-grained two-tier typed exclusion (exclusion_family + exclusion_subclass); writer unbuilt | IMPL | DESIGN ★ |
 | G3 | N2 amendment detect | §3 rule ratified, but executor unbuilt & `is_amendment_insertion` broken | IMPL+ARCH | DESIGN ✦ |
 | G4 | N2 amendment residence | policy for suppressing amending-SI candidates vs the target; backlog tail | RUBRIC+IMPL | OPEN |
 | G5 | N3 cross-ref resolve | rule (§3 count-at-source) SETTLED; residual = executor allocation (L2 pattern vs L3) + cross-ref resolver | IMPL+ARCH | DESIGN |
@@ -36,7 +36,7 @@
 | G22 | L5 label store | label store / version-control unbuilt (blocks all) | IMPL | DESIGN |
 | G23 | BERT inference | no auto-accept-vs-review confidence policy | ARCH | OPEN ★ |
 | G24 | L1 recall gate | recall ceiling = word_list union (silent FN) | LIST+IMPL | OPEN |
-| G25 | L1 orphans | orphan / partial-context candidates bypass unit rule | RUBRIC+IMPL | OPEN ★ |
+| G25 | L1 orphans | RATIFIED: typed orphan-triage lane (clear non-operative / escalate → standard path, orphan=true); lane unbuilt | IMPL | DESIGN ★ |
 | G26 | L1/L3 EU recitals | no soft-law fast-path; retained-EU effect status | RUBRIC | OPEN ★ |
 | G27 | L1 definitions | def capture bounded (≤8) & single-instrument | IMPL | OPEN |
 | G28 | L0/L1 cache | pipeline still fetches live; cache repoint unbuilt | IMPL | OPEN |
@@ -50,8 +50,14 @@
 **G1 — §4 non-operative exclusion: executor allocation (rule settled).** `[N1 · ARCH+RUBRIC · DECIDED-UNBUILT]`
 The §4 non-operative exclusion list is **settled** — it survived three reviews untouched, so the *rule* is decided; N1 is `DECIDED-UNBUILT`, the same shape as N2/G3 (rule ratified, executor unbuilt). What remains is an **executor-allocation question, now on the stage-2 allocation agenda:** (a) which §4 classes are safe as deterministic L2 drops (`shall be deemed`, `shall be defrayed`) versus which need L3 judgement (`list-of-contents vs list-of-requirements`, definitional-embedded-in-prohibition); (b) which layer runs the drop — noting Layer 1 is deliberately high-recall and never drops (§4 signals are non-blocking hints), and the ratified Stage-2 output is a *burden-set per section* with no obvious slot for "this candidate is non-operative, drop it" (see G2). *Closes with:* the deterministic-vs-judgement allocation per §4 class (RUBRIC), and the exclusion-stage architecture (ARCH).
 
-**G2 — No typed EXCLUSION record in the schema.** `[exclusion outcome · ARCH · OPEN ★]`
-A candidate surfaced by L1 that carries no burden needs a first-class *excluded {reason}* record — for the extraction→count funnel, for audit, and as **negative training data for Legal-BERT** (the rubric §7 explicitly wants worked negatives). "Empty burden-set" and "typed exclusion" are not the same thing, and only the burden-set is specified. *Closes with:* a data-contract decision (ARCH) on how exclusions are represented and stored.
+**G2 — Typed EXCLUSION record: fine-grained two-tier schema RATIFIED.** `[exclusion outcome · IMPL · DECIDED-UNBUILT ★]`
+A candidate surfaced by L1 that carries no burden gets a first-class *typed exclusion* record — for the extraction→count funnel, for audit, and as **negative training data for Legal-BERT** (rubric §7 wants worked negatives). "Empty burden-set" and "typed exclusion" are not the same thing. **Ratified design (2026-07-06) — fine-grained, two-tier:** every excluded candidate records `exclusion_family` + `exclusion_subclass`.
+- **Families (4, load-bearing):** `non_operative` · `amendment_machinery` · `counted_at_source` · `public_body_or_no_one`. They map 1:1 to the four EXCLUDED tree nodes (X_NOP / X_AMD / X_PTR / X_PUB).
+- **Sub-classes (recorded, best-effort):** within `non_operative` — `deeming`, `definitional`, `machinery_procedural`, `powers_to_make_secondary`, `scheme_machinery`, `list_of_contents`; within `counted_at_source` — `cross_reference`, `compliance_hook`, `enabling_power`, `penalty_as_consequence` (plus `secondary_offence_reference` if judged distinct from `cross_reference` — flagged as a call to make); plus `mixed_other` available in **both** families so dual-pattern cases don't stall.
+- **Two-tier agreement rule:** dual-model agreement is computed on the **family only** — the count-relevant judgement — and family disagreements route to review. Sub-class mismatches within an agreed family are **logged, never adjudicated**.
+- **Rationale on record:** the sub-class judgement is already made en route to the family call (§4 is a pattern list; matching a pattern *is* identifying the sub-class), so fine typing keeps a paid-for judgement at the cost of one field — buying the diagnostic over-identification audit (false positives locatable by class), sharper typed negatives for Legal-BERT, and the exclusion population as descriptive corpus data.
+
+Consumers: the four EXCLUDED tree nodes and the orphan-triage lane (G25), which emits the same fields. *Closes with:* implementing the exclusion writer + store (IMPL; folds into the label store, G22).
 
 **G3 — Amendment detection: rule ratified, executor unbuilt, existing flag broken.** `[N2 · IMPL+ARCH · DECIDED-UNBUILT ✦]`
 The §3 amendment-machinery rule **is ratified** (amendment = machinery; count at the consolidated target), so this node is `DECIDED-UNBUILT` **at best** — the rule is decided but nothing executes it. The one field that promises the capability, `is_amendment_insertion`, is actively **broken**: `_in_amendment()` fires only when a whole section nests inside `<Addition>`, so it flagged **0 of 1,084** candidates despite 16,366 `<Addition>` nodes (real amendments are inline fragment insertions). It is logged as a bug in `project_decision_log.docx` (2026-07-05, pattern #3 Named ≠ actual — sibling of the `section_ref` "JOIN KEY" entry). **Detection must be at the `<Addition>`-fragment grain**, not the section flag. *Before Stage 2, the field is fixed or renamed so nothing builds on a false signal.* *Closes with:* the fragment-grain detector (IMPL) and an executor decision — markup-rule L4 vs LLM L3 (ARCH); the *rule* is not the gap.
@@ -131,8 +137,13 @@ At corpus run-time there is no policy for when a Legal-BERT output is auto-accep
 **G24 — Recall ceiling = the word_list union.** `[L1 · LIST+IMPL · OPEN]`
 A genuine burden phrased with none of the cue vocabulary is never surfaced and is invisible downstream (silent false negative). This is an upstream *gate* with no "unknown burden" branch; the only control is empirical recall audit against ground truth. *Closes with:* ongoing recall additions (LIST) and a standing recall-audit harness (IMPL). Partly acknowledged in the implementation plan.
 
-**G25 — Orphan / partial-context candidates bypass the unit rule.** `[L1 · RUBRIC+IMPL · OPEN ★]`
-`material_type='orphan'` records are per-sentence with `n_leaves=0`; `context_quality='partial'` records lack ref/heading. The whole decision tree assumes a section-with-leaves; these do not fit it, and no downstream policy says how they decompose, classify, or count. *Closes with:* a handling rule (RUBRIC) and its wiring (IMPL).
+**G25 — Orphan / partial-context candidates: typed triage lane RATIFIED.** `[L1 · IMPL · DECIDED-UNBUILT ★]`
+`material_type='orphan'` records are per-sentence with `n_leaves=0`; `context_quality='partial'` records lack ref/heading, so they do not fit the section-with-leaves tree. **Ratified handling (2026-07-06):** orphans do **not** enter the main pipeline directly — they route to a **typed orphan-triage lane**.
+1. An **LLM first-pass clears** clearly-non-operative fragments, recording the typed §4 exclusion (`exclusion_family`/`exclusion_subclass`, G2). The verdict is **asymmetric** — clear only what is *clearly* non-operative, escalate everything else — and the triage pass does **not** label burdens.
+2. **Escalated** fragments are enriched with retrievable surrounding raw text and **re-enter the standard classification path** (decomposition → category → polarity → obligated_party → actor_capacity → provenance) under the normal dual-model + review machinery — **same record shape, no parallel pipeline**; the retrieved context is part of the candidate the models *see*, not just the human view.
+3. Every orphan-derived record carries **`orphan=true`** to the final burden record, so the slice stays distinguishable (auditable for elevated disagreement / reliability) without being differently shaped.
+
+The lane is the **second consumer of the exclusion-label schema** (G2; N1's §4 exclusions is the first). *Closes with:* building the lane (IMPL). *Related measurement:* corpus-wide orphan-rate check queued pre-labelling (implementation plan) — an anomalous rate signals a Layer-1 sectioning failure, not a queue to process.
 
 **G26 — EU recital / retained-EU material has no fast-path.** `[L1/L3 · RUBRIC · OPEN ★]`
 `eu_recital` sections are surfaced (with a `recital_suspect` hint) but recitals are near-always non-operative soft-law; without a routing rule they either add noise or draw inconsistent LLM calls. Retained/assimilated-EU direct-effect and applicability status is also unaddressed in the tree. *Closes with:* a material-type routing rule (RUBRIC).

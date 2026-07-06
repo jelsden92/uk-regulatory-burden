@@ -13,26 +13,28 @@ flowchart TD
 
   IN["INTAKE: assembled section block + leaves[] + hints (per candidate)<br/>rule: §Extraction unit — one record per flagged section<br/>exec: L1 · status: BUILT"]:::built
   RECALL["UPSTREAM GATE: a section with NO cue anywhere is never surfaced<br/>rule: Stage-1 recall gate (word_list union = the ceiling)<br/>exec: L1 · status: OPEN (silent FN risk; only control is recall audit vs ground truth)"]:::open
-  ORPH["SIDE BRANCH: orphan / context_quality=partial candidates<br/>(per-sentence, n_leaves=0) bypass the unit rule<br/>exec: UNALLOCATED · status: OPEN (unhandled downstream)"]:::open
+  ORPH["ORPHAN TRIAGE LANE: orphan / context_quality=partial candidates (n_leaves=0)<br/>rule: RATIFIED — LLM first-pass CLEARS clearly-non-operative (records typed §4 exclusion, → gaps G2);<br/>verdict ASYMMETRIC (clear only the clearly-non-operative, escalate the rest); triage does NOT label burdens<br/>escalated → enriched with retrievable surrounding raw text → RE-ENTER standard path (N5..N10),<br/>normal dual-model + review; orphan=true carried to the final record (same shape; auditable slice)<br/>exec: UNBUILT (lane) · status: DECIDED-UNBUILT (rule ratified, lane unbuilt) · → gaps G25"]:::design
   IN -.->|precondition| RECALL
-  IN -.->|edge material| ORPH
+  IN -.->|orphan / partial subset| ORPH
+  ORPH -->|cleared: non-operative| X_NOP
+  ORPH -->|escalated, context-enriched| N5
 
   IN --> N1
 
   N1["N1  OPERATIVE? binds an obligation/prohibition (not deem/define/enable)<br/>rule: §4 non-operative exclusion list — SETTLED (survived three reviews untouched)<br/>exec: UNALLOCATED (L2 deterministic vs L3 LLM split — allocation question, → gaps G1)<br/>status: DECIDED-UNBUILT (rule decided, executor unbuilt)"]:::design
-  N1 -->|non-operative| X_NOP["EXCLUDED: non-operative (typed: which §4 class)<br/>exec: UNALLOCATED · status: OPEN (exclusion-label schema undefined)"]:::open
+  N1 -->|non-operative| X_NOP["EXCLUDED · exclusion_family=non_operative<br/>subclass ∈ {deeming, definitional, machinery_procedural, powers_to_make_secondary,<br/>scheme_machinery, list_of_contents, mixed_other} (recorded best-effort)<br/>exec: UNBUILT (exclusion writer) · status: DECIDED-UNBUILT (typed-exclusion schema ratified, → gaps G2)"]:::design
   N1 -->|operative| N2
 
   N2["N2  Operative content is a TEXTUAL AMENDMENT of another instrument?<br/>rule: notes item 4 (amendment = machinery; count at consolidated target) — RATIFIED<br/>exec: UNBUILT (markup-L4? LLM-L3?); is_amendment_insertion BROKEN (0/1,084 — see decision log)<br/>detect at Addition-fragment grain; fix or rename before Stage 2<br/>status: DECIDED-UNBUILT (rule decided, executor unbuilt)"]:::design
-  N2 -->|yes| X_AMD["EXCLUDED: amendment machinery — burden counted at target (residence)<br/>exec: UNALLOCATED · status: OPEN (dedup vs target; editorial-backlog tail = zero-count)"]:::open
+  N2 -->|yes| X_AMD["EXCLUDED · exclusion_family=amendment_machinery — burden counted at target (residence)<br/>exec: UNBUILT (exclusion writer) · status: DECIDED-UNBUILT (typed-exclusion schema ratified, → gaps G2)<br/>residual OPEN: dedup vs target + editorial-backlog zero-count tail (→ gaps G4/G18)"]:::design
   N2 -->|no| N3
 
   N3["N3  POINTER / HOOK / CROSS-REFERENCE only? (burden defined elsewhere)<br/>rule: §3 count-at-source family — SETTLED (cross-refs, compliance/contravention hooks, enabling powers,<br/>penalty-as-consequence, offence primary-vs-secondary; several ratified this month)<br/>exec: UNALLOCATED (L2 pattern vs L3 model + referenced-provision resolution — allocation question, → gaps G5)<br/>status: DECIDED-UNBUILT (rule decided, executor unbuilt)"]:::design
-  N3 -->|reference only| X_PTR["EXCLUDED: counted at source<br/>exec: UNALLOCATED · status: OPEN (cross-ref/offence-target join not built)"]:::open
+  N3 -->|reference only| X_PTR["EXCLUDED · exclusion_family=counted_at_source<br/>subclass ∈ {cross_reference, compliance_hook, enabling_power, penalty_as_consequence,<br/>secondary_offence_reference, mixed_other} (recorded best-effort)<br/>exec: UNBUILT · status: DECIDED-UNBUILT (schema ratified → gaps G2; cross-ref resolver → gaps G5)"]:::design
   N3 -->|carries its own burden| N4
 
   N4["N4  Burden falls on a PRIVATE ACTOR?<br/>rule: §1/§5C statutory-source function test (statutory=public / contractual=private; funding-irrelevant)<br/>exec: UNALLOCATED — needs a statutory-bodies REGISTRY (does not exist); keyword lists exist but UNWIRED<br/>status: OPEN"]:::open
-  N4 -->|public body / no one| X_PUB["EXCLUDED: public-body / falls-on-no-one<br/>(levy duties on private firms still COUNT)<br/>exec: UNALLOCATED · status: OPEN"]:::open
+  N4 -->|public body / no one| X_PUB["EXCLUDED · exclusion_family=public_body_or_no_one<br/>(levy duties on private firms still COUNT)<br/>exec: UNBUILT (exclusion writer) · status: DECIDED-UNBUILT (typed-exclusion schema ratified, → gaps G2)"]:::design
   N4 -->|genuinely mixed / hybrid| REVIEW
   N4 -->|private actor| N5
 
@@ -60,7 +62,7 @@ flowchart TD
   N10["N10  PROVENANCE — introduced_by / introduced_year (nullable)<br/>rule: notes item 5 — residence (count) vs provenance (growth) split<br/>exec: UNALLOCATED — L4 Citation resolver (Addition→Commentary→Citation, ~100% recoverable) NOT built<br/>status: OPEN (fragment-grain, not is_amendment_insertion; multi-instrument sections)"]:::open
   N10 --> EMIT
 
-  EMIT["EMIT BURDEN {category, polarity, obligated_party, actor_capacity, provenance}<br/>exec: L5 label store · status: OPEN (label store / version-control not built)"]:::open
+  EMIT["EMIT BURDEN {category, polarity, obligated_party, actor_capacity, provenance, orphan?}<br/>exec: L5 label store · status: OPEN (label store / version-control not built)"]:::open
   EMIT --> SPINE
 
   REVIEW["ROUTE TO REVIEW (Layer 5) — 4 axes converge:<br/>hybrid-actor / ambiguous-leaf / Cat6 / polarity-review / model-disagreement<br/>exec: L5 human · status: OPEN (queue taxonomy + set-vs-set burden-matching undefined)"]:::open

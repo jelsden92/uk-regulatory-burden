@@ -58,6 +58,8 @@ flowchart TD
     L5d["Label store / version-control (established before any real label)"]:::design
   end
 
+  ORPHLANE["Orphan triage lane (material_type='orphan'; n_leaves=0; context_quality=partial)<br/>LLM first-pass CLEARS clearly-non-operative → typed exclusion (exclusion_family/subclass; L5d, G2);<br/>ASYMMETRIC — escalate the rest; escalated → enriched w/ retrievable raw text → RE-ENTER L3 standard path<br/>orphan=true carried to the final record (same shape, no parallel pipeline; auditable slice)<br/>RATIFIED rule, lane UNBUILT"]:::design
+
   SPINE["COUNTING SPINE (consumes L2-L4)<br/>burden-count per candidate + grouping across candidates<br/>cross-instrument dedup (no policy) · body↔schedule join (none)<br/>→ headline total + economic FLOOR (economic-only; both/either own line)"]:::open
 
   BERT["Legal-BERT — production classifier (trained from L5 labels; runs full corpus)<br/>cannot emit per-section multiplicity → open architecture question"]:::design
@@ -65,6 +67,8 @@ flowchart TD
   %% ---- main flow ----
   L0 --> L1
   L1out --> L2
+  L1out -.->|orphan / partial subset| ORPHLANE
+  ORPHLANE -->|escalated, context-enriched| L3
   L2 --> L3
   L3 --> L4
   L4 --> L5
