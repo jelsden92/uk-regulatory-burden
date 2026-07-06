@@ -64,6 +64,23 @@ Responses to the v2.2 review, ratified by the project lead. Fold into the named 
 
 ---
 
+## Batched for the next revision (from 2026-07-06 — triage session; completes the file for the v2.3 build)
+
+Three rubric-touching items from the triage that resolved the four "stranger" findings. Fold into the named sections at the next revision. Full designs live in `docs/decision_tree_gaps.md` (G18, G2, G25) and `docs/implementation_plan.md`.
+
+**10. §1 (near count-not-magnitude) — devolution labelling instruction.**
+- Parallel jurisdictional instruments (uksi / ssi / wsi / nisr counterparts) **count separately** — the primary count is **residence-based**, one burden per instrument, exactly as the unit rule and amendment rule already work.
+- The deduplicated **"distinct rules"** view is a **downstream analysis lens**, built post-labelling. **Labellers NEVER make a sameness / duplication judgement** — classify what is in front of you; family-linking happens later. (Design: G18, two-lens.)
+
+**11. §4 (+ the relevant §3 rules) + schema-mapping — exclusion typing instruction.**
+- A candidate that carries no burden is recorded as a **typed exclusion**, not dropped silently: **`exclusion_family`** ∈ {non_operative, amendment_machinery, counted_at_source, public_body_or_no_one} + a best-effort **`exclusion_subclass`** (the §4 / §3 pattern matched), per the ratified **fine-grained two-tier** design; **`mixed_other`** is available in both families for dual-pattern cases.
+- Dual-model agreement is computed on the **family** (the count-relevant call); sub-class mismatches within an agreed family are logged, not adjudicated. (Design: G2.)
+
+**12. Schema / pipeline section — orphan-lane pointer.**
+- Orphan candidates (`n_leaves=0`, partial context) **route to a triage lane before classification**: an LLM first-pass clears clearly-non-operative fragments (typed exclusion, per item 11) and **escalates the rest**; escalated fragments **re-enter the standard classification path context-enriched**, flagged **`orphan=true`**. See `docs/implementation_plan.md` for the lane design. (Design: G25.)
+
+---
+
 ## Route elsewhere — NOT a rubric edit
 
 **→ `project_decision_log.docx` ("The recurring patterns" section) — a new named pattern.**

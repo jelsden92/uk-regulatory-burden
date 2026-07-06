@@ -1,6 +1,6 @@
 # Decision-Tree Gap List — agenda for the stage-2 design session
 
-**Date:** 2026-07-05 · **Status:** mapping exercise; **triage in progress (2026-07-06)** — as rules are ratified, entries flip `OPEN → DECIDED-UNBUILT` and the residual (executor/impl) moves to the stage-2 agenda. Reclassified so far: **G1, G5** (rule settled, executor-allocation only); **G25** (orphan-triage lane ratified); **G2** (typed-exclusion schema ratified); **G21** (review-queue taxonomy ratified as schema); **G18** (devolution duplicates — two-lens design). Further items pending.
+**Date:** 2026-07-05 · **Status:** mapping exercise; **triage session CLOSED 2026-07-06** — all four stranger findings resolved (orphan-triage lane G25, typed-exclusion schema G2, review-queue taxonomy G21, devolution two-lens G18); five decision-tree nodes reclassified `OPEN → DECIDED-UNBUILT` (N1/G1, N3/G5, orphan, review, devolution — plus the four EXCLUDED nodes with the exclusion schema); **allocation pile → confirmed stage-2 design agenda** (see below); **parked pile → confirmed pilot-gated with named revisit triggers** (G10, G12, G15). Reclassified gaps: G1, G5, G2, G18, G21, G25.
 **Companions:** `pipeline_architecture.mmd` (systems view), `candidate_decision_tree.mmd` (logic view).
 **Method:** every decision node in the per-candidate tree was annotated `rule · executor · status`; this is the flat list of every node where the **rule is missing/vague**, the **executor is unallocated**, or the **required data/implementation does not exist**. Each entry says *what is missing* and *what kind of decision closes it* — it does **not** propose the answer.
 
@@ -85,13 +85,13 @@ The §5C function test needs a canonical list of statutory bodies (FSCS, FOS, re
 How a section becomes N burden units — per-candidate classifier, counting head, BIO/span tagging, or decompose-then-classify — is the single decision that fixes both the labelling I/O contract and the production-model shape. Formally deferred to stage-2 (rubric §7 item 1, notes item 6). **Selection criterion:** the chosen architecture must emit **usable confidence outputs** — production review depends on confidence-thresholding *replacing* disagreement as the model-side uncertainty signal (G21, G23), and the four candidate architectures differ in how naturally they provide it. *Closes with:* the stage-2 architecture choice (ARCH).
 
 **G10 — Burden-vs-condition discriminator not empirically tested.** `[N5 · RUBRIC · OPEN]`
-The unit rule's core call — obligation-leaf (count each) vs condition/factor-leaf (count once) — is defined but not yet run against real chapeau-plus-list provisions from the corpus (§7 item 3). Until tested, the two models will diverge on multiplicity. *Closes with:* a validation pass and any resulting rule tightening (RUBRIC).
+The unit rule's core call — obligation-leaf (count each) vs condition/factor-leaf (count once) — is defined but not yet run against real chapeau-plus-list provisions from the corpus (§7 item 3). Until tested, the two models will diverge on multiplicity. **Revisit trigger (parked, pilot-gated):** Jethro's hand-labelling pass + the dry run — the §7 field-test. *Closes with:* a validation pass and any resulting rule tightening (RUBRIC).
 
 **G11 — Legal-BERT cannot emit per-section multiplicity.** `[N5→BERT · ARCH · OPEN]`
 A per-candidate production classifier structurally cannot reproduce "3 burdens in this section" or cross-candidate merges without a counting/tagging scheme. The labelled unit (burden) and the model's emission grain (candidate) are mismatched. Companion to G9. *Closes with:* the same architecture choice, viewed from the production side (ARCH).
 
 **G12 — Category enum conflates two axes.** `[N6 · RUBRIC · DESIGN]`
-Cats 1/2/5 classify by trigger-timing; Cats 3/4 (IB/IBA) by defence-structure. Resolved *for now* by the defence-dominance precedence rule (notes item 7) as a stated simplification — logged as pilot-contingent (may need an orthogonal defence flag if defence-revealed burdens show materially different trigger profiles). *Closes with:* a post-pilot rubric decision (RUBRIC).
+Cats 1/2/5 classify by trigger-timing; Cats 3/4 (IB/IBA) by defence-structure. Resolved *for now* by the defence-dominance precedence rule (notes item 7) as a stated simplification — logged as pilot-contingent (may need an orthogonal defence flag if defence-revealed burdens show materially different trigger profiles). **Revisit trigger (parked, pilot-gated):** a pilot showing defence-revealed burdens with materially different trigger profiles. *Closes with:* a post-pilot rubric decision (RUBRIC).
 
 ## Per-burden attributes (Layers 3–4)
 
@@ -102,7 +102,7 @@ Cats 1/2/5 classify by trigger-timing; Cats 3/4 (IB/IBA) by defence-structure. R
 Free-text party ("employer" / "operator" / "any person") is the field on which actor-capacity, dedup, and aggregation all depend. Without a controlled taxonomy those downstream steps are unstable. *Closes with:* a schema decision (ARCH) and a party taxonomy (LIST).
 
 **G15 — Actor-capacity boundary deferred to phase 2/3.** `[N9 · RUBRIC+ARCH · OPEN ✦]`
-Phase 1 uses generous `ambiguous`; the economic figure is a **floor**, not a share. The activity-profile rule (notes item 8: classify the activity not the subject; scheme-splits follow the scheme; both/either needs a positive judgement) is new and untested. *Closes with:* the deferred-phase refinement plan (ARCH) and validation of the activity-profile rule on real cases (RUBRIC).
+Phase 1 uses generous `ambiguous`; the economic figure is a **floor**, not a share. The activity-profile rule (notes item 8: classify the activity not the subject; scheme-splits follow the scheme; both/either needs a positive judgement) is new and untested. **Revisit trigger (parked, pilot-gated):** pilot data, including the both/either base-rate question. *Closes with:* the deferred-phase refinement plan (ARCH) and validation of the activity-profile rule on real cases (RUBRIC).
 
 **G16 — Economic-floor reporting needs schema + query support.** `[N9 · IMPL · OPEN]`
 The reporting rule (floor = economic-only; both/either and ambiguous as separate lines) requires the capacity field to exist and a reporting query to segment it. Neither is built. *Closes with:* implementation once the field lands (IMPL).
@@ -172,9 +172,19 @@ The extractor attaches ≤8 defined terms from the same document. A classificati
 
 ---
 
+## Stage-2 allocation agenda — CONFIRMED (2026-07-06)
+
+The allocation pile transfers to the stage-2 design session **as-is** — nothing in it needs a decision before that session. The confirmed agenda is the set of `UNALLOCATED` executor questions (the rules above them are settled; these are ARCH/IMPL allocations, not open rule questions):
+
+- **N1 §4 exclusions (G1)** — executor: L2-deterministic vs L3-model split (+ where the drop happens).
+- **N3 count-at-source (G5)** — resolution machinery: L2 pattern vs L3, plus the cross-reference / offence-target resolver.
+- **N4 actor (G6 / G7)** — statutory-bodies registry wiring, and the function-source test executor.
+- **N10 provenance (G17)** — the fragment-grain Citation resolver.
+- **Decomposition architecture (G9 / G11 / G20)** — the load-bearing Layer-3 choice (per-candidate / counting-head / BIO-tag / decompose-then-classify), which fixes set-vs-set matching (G20) and the production-model shape. **Selection criterion: must emit usable confidence outputs** (production review depends on confidence-thresholding replacing disagreement — G21 / G23).
+
 ## Reading of the map
 
 - **Known-unknowns confirmed (✦):** G3 (amendment detection at `<Addition>`-fragment grain), G6 (statutory-bodies list), G9 (decomposition architecture), G15 (capacity deferral), G18 (dedup policy), G19 (body↔schedule join) — all present, as the calibration note required.
 - **Newly surfaced (★):** G2 (exclusion-record schema), G20 (set-vs-set burden matching), G21 (review-queue taxonomy), G23 (BERT inference routing), G25 (orphan handling), G26 (EU-recital fast-path). These are the holes the diagram exposed that were not on the anticipated list — mostly at the **Layer-5 adjudication schema** and the **intake edges**, i.e. the two ends the rubric talks about least.
 - **The load-bearing decision:** G9/G11 (the decomposition architecture) sits under G2, G18, G19, G20 and the whole schema. It is the one to take first in the stage-2 session — most other ARCH gaps resolve differently depending on it.
-- **Not one gap type but four:** the map is roughly `RUBRIC ×7, ARCH ×12, LIST ×4, IMPL ×13` (with overlaps). The ARCH cluster is the stage-2 agenda proper; the IMPL cluster is downstream of it; the RUBRIC items are the project lead's to close and several (G10, G12, G15) are explicitly pilot-contingent.
+- **Not one gap type but four:** the map is roughly `RUBRIC ×9, ARCH ×11, LIST ×3, IMPL ×17` (with overlaps; refreshed 2026-07-06 after the triage reclassifications — the ratified items shed their RUBRIC/ARCH open-question content and are now IMPL-to-build). **Status distribution: 11 DECIDED-UNBUILT, 17 OPEN** (0 built — the Layer-0/1 built items sit outside this gap list). The ARCH cluster is the stage-2 agenda proper; the IMPL cluster is downstream of it; the RUBRIC items are the project lead's to close and several (G10, G12, G15) are explicitly pilot-contingent (parked, with revisit triggers recorded against each).
