@@ -12,11 +12,11 @@
 
 | ID | Node / layer | What's undecided | Closes with | Status |
 |----|---|---|---|---|
-| G1 | N1 §4 exclusions | executor split (deterministic vs LLM) + where the drop happens | ARCH+RUBRIC | OPEN |
+| G1 | N1 §4 exclusions | rule (§4 list) SETTLED; residual = executor allocation (deterministic vs LLM) + where the drop happens | ARCH+RUBRIC | DESIGN |
 | G2 | exclusion outcome | no typed "excluded" record in the burden-set schema | ARCH | OPEN ★ |
 | G3 | N2 amendment detect | §3 rule ratified, but executor unbuilt & `is_amendment_insertion` broken | IMPL+ARCH | DESIGN ✦ |
 | G4 | N2 amendment residence | policy for suppressing amending-SI candidates vs the target; backlog tail | RUBRIC+IMPL | OPEN |
-| G5 | N3 cross-ref resolve | no resolver for "under section X" / offence primary-vs-secondary | IMPL+ARCH | OPEN |
+| G5 | N3 cross-ref resolve | rule (§3 count-at-source) SETTLED; residual = executor allocation (L2 pattern vs L3) + cross-ref resolver | IMPL+ARCH | DESIGN |
 | G6 | N4 statutory bodies | canonical statutory-bodies registry does not exist | LIST+IMPL | OPEN ✦ |
 | G7 | N4 function test | statutory-vs-contractual executor unallocated | ARCH | OPEN |
 | G8 | N4 context terms | §5D term-flip needs per-Act definition resolution | IMPL+RUBRIC | OPEN |
@@ -47,8 +47,8 @@
 
 ## Gate & structural rules (Layers 1–2)
 
-**G1 — §4 non-operative exclusion: executor split, and *where* the drop happens.** `[N1 · ARCH+RUBRIC · OPEN]`
-Layer 1 is deliberately high-recall and never drops (§4 signals are non-blocking hints). So the actual exclusion happens later — but the ratified Stage-2 output is a *burden-set per section*, which has no obvious slot for "this candidate is non-operative, drop it." Undecided: (a) which §4 classes are safe as deterministic L2 drops (`shall be deemed`, `shall be defrayed`) versus which need L3 judgement (`list-of-contents vs list-of-requirements`, definitional-embedded-in-prohibition); (b) which layer runs the drop. *Closes with:* a rule assigning each §4 class to deterministic-or-judgement (RUBRIC), and an architecture decision on the exclusion stage (ARCH).
+**G1 — §4 non-operative exclusion: executor allocation (rule settled).** `[N1 · ARCH+RUBRIC · DECIDED-UNBUILT]`
+The §4 non-operative exclusion list is **settled** — it survived three reviews untouched, so the *rule* is decided; N1 is `DECIDED-UNBUILT`, the same shape as N2/G3 (rule ratified, executor unbuilt). What remains is an **executor-allocation question, now on the stage-2 allocation agenda:** (a) which §4 classes are safe as deterministic L2 drops (`shall be deemed`, `shall be defrayed`) versus which need L3 judgement (`list-of-contents vs list-of-requirements`, definitional-embedded-in-prohibition); (b) which layer runs the drop — noting Layer 1 is deliberately high-recall and never drops (§4 signals are non-blocking hints), and the ratified Stage-2 output is a *burden-set per section* with no obvious slot for "this candidate is non-operative, drop it" (see G2). *Closes with:* the deterministic-vs-judgement allocation per §4 class (RUBRIC), and the exclusion-stage architecture (ARCH).
 
 **G2 — No typed EXCLUSION record in the schema.** `[exclusion outcome · ARCH · OPEN ★]`
 A candidate surfaced by L1 that carries no burden needs a first-class *excluded {reason}* record — for the extraction→count funnel, for audit, and as **negative training data for Legal-BERT** (the rubric §7 explicitly wants worked negatives). "Empty burden-set" and "typed exclusion" are not the same thing, and only the burden-set is specified. *Closes with:* a data-contract decision (ARCH) on how exclusions are represented and stored.
@@ -59,8 +59,8 @@ The §3 amendment-machinery rule **is ratified** (amendment = machinery; count a
 **G4 — Amendment residence policy is incomplete.** `[N2/spine · RUBRIC+IMPL · OPEN]`
 The rule says count the burden once, at the amended target in consolidated form. But amending SIs are themselves separate corpus items, so their amendment provisions will surface as candidates. There is no policy suppressing those so the count lands once at the target, and the legislation.gov.uk editorial backlog means a small tail of targets is not yet updated → **zero-count**. *Closes with:* a residence/suppression rule (RUBRIC) and its enforcement in the spine (IMPL). Overlaps G18.
 
-**G5 — Cross-reference / offence-target resolution not built.** `[N3 · IMPL+ARCH · OPEN]`
-Count-at-source and the offence primary-vs-secondary distinction both require resolving "a requirement under section X" / "contravenes section 4" to the referenced provision — possibly in another instrument. No resolver exists. Without it, offence cross-references and compliance hooks can't be reliably separated from primary burdens. *Closes with:* a reference-resolution component (IMPL) and a decision on whether it is deterministic or LLM-assisted (ARCH).
+**G5 — Count-at-source: executor allocation + cross-ref resolver (rule settled).** `[N3 · IMPL+ARCH · DECIDED-UNBUILT]`
+The §3 count-at-source family — cross-refs, compliance/contravention hooks, enabling powers, penalty-as-consequence, offence primary-vs-secondary — is **settled** (several members ratified this month), so N3 is `DECIDED-UNBUILT`, the same shape as N2/G3. What remains is an **executor-allocation question, now on the stage-2 allocation agenda** (L2 pattern vs L3 model), plus its dependency: count-at-source and the offence primary-vs-secondary distinction both require resolving "a requirement under section X" / "contravenes section 4" to the referenced provision — possibly in another instrument — and no such resolver exists. Without it, offence cross-references and compliance hooks can't be reliably separated from primary burdens. *Closes with:* the reference-resolution component (IMPL), and the deterministic-vs-LLM allocation (ARCH).
 
 ## Actor classification (Layer 4)
 

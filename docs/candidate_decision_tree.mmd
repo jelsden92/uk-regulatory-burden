@@ -19,7 +19,7 @@ flowchart TD
 
   IN --> N1
 
-  N1["N1  OPERATIVE? binds an obligation/prohibition (not deem/define/enable)<br/>rule: §4 non-operative exclusions<br/>exec: UNALLOCATED (L2 deterministic vs L3 LLM split undecided)<br/>status: OPEN"]:::open
+  N1["N1  OPERATIVE? binds an obligation/prohibition (not deem/define/enable)<br/>rule: §4 non-operative exclusion list — SETTLED (survived three reviews untouched)<br/>exec: UNALLOCATED (L2 deterministic vs L3 LLM split — allocation question, → gaps G1)<br/>status: DECIDED-UNBUILT (rule decided, executor unbuilt)"]:::design
   N1 -->|non-operative| X_NOP["EXCLUDED: non-operative (typed: which §4 class)<br/>exec: UNALLOCATED · status: OPEN (exclusion-label schema undefined)"]:::open
   N1 -->|operative| N2
 
@@ -27,7 +27,7 @@ flowchart TD
   N2 -->|yes| X_AMD["EXCLUDED: amendment machinery — burden counted at target (residence)<br/>exec: UNALLOCATED · status: OPEN (dedup vs target; editorial-backlog tail = zero-count)"]:::open
   N2 -->|no| N3
 
-  N3["N3  POINTER / HOOK / CROSS-REFERENCE only? (burden defined elsewhere)<br/>rule: §3 count-at-source; compliance/contravention hooks; enabling powers; penalty-as-consequence;<br/>offence primary-statement vs secondary-cross-ref<br/>exec: UNALLOCATED (L2 pattern + referenced-provision resolution — not built)<br/>status: OPEN"]:::open
+  N3["N3  POINTER / HOOK / CROSS-REFERENCE only? (burden defined elsewhere)<br/>rule: §3 count-at-source family — SETTLED (cross-refs, compliance/contravention hooks, enabling powers,<br/>penalty-as-consequence, offence primary-vs-secondary; several ratified this month)<br/>exec: UNALLOCATED (L2 pattern vs L3 model + referenced-provision resolution — allocation question, → gaps G5)<br/>status: DECIDED-UNBUILT (rule decided, executor unbuilt)"]:::design
   N3 -->|reference only| X_PTR["EXCLUDED: counted at source<br/>exec: UNALLOCATED · status: OPEN (cross-ref/offence-target join not built)"]:::open
   N3 -->|carries its own burden| N4
 
