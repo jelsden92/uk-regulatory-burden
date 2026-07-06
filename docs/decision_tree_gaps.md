@@ -1,6 +1,6 @@
 # Decision-Tree Gap List — agenda for the stage-2 design session
 
-**Date:** 2026-07-05 · **Status:** mapping exercise; **triage in progress (2026-07-06)** — as rules are ratified, entries flip `OPEN → DECIDED-UNBUILT` and the residual (executor/impl) moves to the stage-2 agenda. Reclassified so far: **G1, G5** (rule settled, executor-allocation only); **G25** (orphan-triage lane ratified); **G2** (typed-exclusion schema ratified); **G21** (review-queue taxonomy ratified as schema). Further items pending.
+**Date:** 2026-07-05 · **Status:** mapping exercise; **triage in progress (2026-07-06)** — as rules are ratified, entries flip `OPEN → DECIDED-UNBUILT` and the residual (executor/impl) moves to the stage-2 agenda. Reclassified so far: **G1, G5** (rule settled, executor-allocation only); **G25** (orphan-triage lane ratified); **G2** (typed-exclusion schema ratified); **G21** (review-queue taxonomy ratified as schema); **G18** (devolution duplicates — two-lens design). Further items pending.
 **Companions:** `pipeline_architecture.mmd` (systems view), `candidate_decision_tree.mmd` (logic view).
 **Method:** every decision node in the per-candidate tree was annotated `rule · executor · status`; this is the flat list of every node where the **rule is missing/vague**, the **executor is unallocated**, or the **required data/implementation does not exist**. Each entry says *what is missing* and *what kind of decision closes it* — it does **not** propose the answer.
 
@@ -29,7 +29,7 @@
 | G15 | N9 capacity boundary | economic/personal boundary deferred to phase 2/3 | RUBRIC+ARCH | OPEN ✦ |
 | G16 | N9 economic floor | floor reporting needs capacity field + query | IMPL | OPEN |
 | G17 | N10 provenance | Citation resolver unbuilt; must be fragment-grain | IMPL | OPEN |
-| G18 | spine dedup | cross-instrument dedup policy does not exist | ARCH+RUBRIC | OPEN ✦ |
+| G18 | spine dedup | RATIFIED: two lenses — residence-based primary count + family_id enrichment relation (uniform/divergent); linker unbuilt, post-labelling | IMPL | DESIGN ✦ |
 | G19 | spine join | body↔schedule / amend↔target join does not exist | ARCH+IMPL | OPEN ✦ |
 | G20 | L5 set-vs-set | no burden-matching rule when model counts differ | ARCH+RUBRIC | OPEN ★ |
 | G21 | L5 review queue | RATIFIED as SCHEMA (review_reason + feeds fields), not tooling; fields unbuilt pending label store | IMPL | DESIGN ★ |
@@ -112,8 +112,18 @@ The reporting rule (floor = economic-only; both/either and ambiguous as separate
 
 ## Counting spine
 
-**G18 — Cross-instrument dedup policy does not exist.** `[spine · ARCH+RUBRIC · OPEN ✦]`
-The "one rule, multiple textual homes" pattern (the project's characteristic failure surface) means the same burden can be reached via several instruments; it must be counted once. But dedup must **not** collapse *intentional* devolution duplicates (parallel E&W / Scotland provisions, counted separately by design). No dedup key or policy distinguishes accidental from intentional duplication. *Closes with:* a dedup key/architecture (ARCH) and a rule on what counts as the same burden (RUBRIC).
+**G18 — Devolution / parallel-instrument duplicates: two-lens design RATIFIED.** `[spine · IMPL · DECIDED-UNBUILT ✦]`
+The "one rule, multiple textual homes" pattern means the same regulatory control can appear in several instruments; but *intentional* devolution duplicates (parallel E&W / Scotland / Wales / NI provisions) must not be silently collapsed. **Ratified design (2026-07-06) — two lenses:**
+- **Primary (labelling-time) count = residence-based.** Parallel duties in four jurisdictional instruments are **four burdens** — consistent with the unit rule and the amendment rule; **no similarity test touches the counting spine.** This lens answers *"how much prescriptive content does the in-force statute book contain."*
+- **Duplicate-family relation (enrichment lens).** Burdens gain a nullable **`family_id`**; families carry a **uniform / divergent** flag, with the differing fields recorded. This lens answers *"how much distinct regulatory control does society face."* **Acceptance test:** Route-A (one UK instrument) and Route-B (four parallel instruments) must **coincide** on this lens. Required **before first publication** (the project's "control on society" framing lives here); **built post-labelling.**
+
+**Mechanism (five stages, structure-first):** (a) candidate instrument-family pairs from Layer-0 metadata (year, counterpart types `uksi`/`ssi`/`wsi`/`nisr`, title similarity, extent); (b) structural alignment of burdens within paired instruments (position + section skeleton); (c) text similarity as **confirmer only** — never creates a link without the structural scaffolding; (d) uncertain band → review queue (`family_link` added to `review_reason`, a **production-era** lane, G21); (e) attribute comparison → uniform/divergent tagging.
+
+**Acceptance bar — good-enough, asymmetric, measured:** precision favoured over recall (a missed link biases the distinct-rules count *conservatively* = cheap; a false merge overclaims sameness = the expensive direction, kept fussy). Errors are **bounded and non-propagating** — this is an enrichment layer, and the **primary count is untouched.** Achieved link-precision is validated by a stratified hand-audited sample and **stated in the methodology** — the claim is *characterised* error, not minimal error.
+
+**Scope for publication:** devolution counterparts only; cross-sector template parallels are future analysis, not publication-gating.
+
+The **methodology reports both lenses with this rationale**, which pre-empts the devolution-artefact critique (that the statute-book count inflates by counting parallel instruments). *Closes with:* building the family-linker (IMPL), post-labelling / pre-publication. Related: G19 (body↔schedule / amend↔target join), G20 (set-vs-set matching), G4 (amendment residence).
 
 **G19 — Body↔schedule / amend↔target join does not exist.** `[spine · ARCH+IMPL · OPEN ✦]`
 A burden's operative clause and its schedule detail — or an amending Act's insertion and its target section — live in different sections or items. `section_ref` is non-unique (48 collisions on the 7-Act set) and DOM-identity keys are per-item only. There is no cross-section/cross-item burden-grouping key. *Closes with:* a grouping-key design (ARCH) and its implementation (IMPL). Related to G4/G17.
@@ -125,7 +135,7 @@ Agreement is defined for the equal-count/equal-label case. When Claude and Gemin
 
 **G21 — Review-queue taxonomy: ratified as SCHEMA (not infrastructure).** `[L5 · IMPL · DECIDED-UNBUILT ★]`
 At least five distinct review reasons converge on one queue with no typed reason recorded. **Ratified design (2026-07-06) — two label-record fields, present from the first pilot adjudication, not a queue tool:**
-- **`review_reason`** — primary (the route that fired **first in tree order**) plus optional **secondary** for compound cases. Values: `model_disagreement`, `hybrid_actor`, `ambiguous_leaf`, `cat6_category`, `polarity_review`, `orphan_escalation`, `context_term` — plus `low_confidence`, **reserved for the production phase** (see phase note below).
+- **`review_reason`** — primary (the route that fired **first in tree order**) plus optional **secondary** for compound cases. Values: `model_disagreement`, `hybrid_actor`, `ambiguous_leaf`, `cat6_category`, `polarity_review`, `orphan_escalation`, `context_term` — plus `low_confidence` and `family_link` (devolution-family uncertain band, G18), both **reserved for the production phase** (see phase note below).
 - **`feeds`** — recorded **at resolution**: `registry` | `rubric_example` | `unit_rule_evidence` | `training_data` | `definitions`. This is what makes adjudication harvest **mechanical** — rulings flow to the statutory-bodies registry (G6), the rubric's worked examples, the unit-rule field-test evidence (G10), the training set — rather than archaeological.
 - **No queue tooling is built.** During labelling, *lanes* = sorting records by `review_reason` before an adjudication session; *priority* = one line of guidance (gating lanes first: `model_disagreement` blocks training data, `hybrid_actor` blocks the registry, `ambiguous_leaf` feeds the unit-rule test; the rest pool). Production-era tooling, if any, is a main-run design question that inherits these fields.
 - **Phase note:** the same `review_reason` schema serves both phases with a different traffic mix — dual-model disagreement is the *training-data-phase* model-side uncertainty signal; in production, `low_confidence` (Legal-BERT confidence-threshold) routes to review where disagreement did. The rules-layer lanes (`hybrid_actor`/unlisted-body, `orphan_escalation`, `context_term`) and the random audit slice run through **both** phases unchanged.
