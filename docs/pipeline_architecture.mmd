@@ -39,7 +39,7 @@ flowchart TD
     L3a["Decompose section into burden UNITS (rubric §1 unit rule)<br/>obligation-leaf vs condition/factor-leaf; span-merge; ambiguous-leaf→review<br/>** architecture undecided: per-candidate / counting-head / BIO / decompose-then-classify **"]:::open
     L3b["Category — six categories (rubric §2)<br/>trigger-control discriminator; defence-dominance precedence (notes item 7)"]:::design
     L3c["Polarity — obligation/prohibition/review (rubric §2A)<br/>operative-requirement rule; defence-revealed polarity (notes item 9)"]:::design
-    L3d["Claude + Gemini classify independently against the rubric"]:::design
+    L3d["Claude + Gemini classify independently against the rubric<br/>** TRAINING-DATA phase machinery — production classifier is Legal-BERT (below) **<br/>disagreement-routing here = the training-phase model-side uncertainty signal"]:::design
   end
 
   subgraph L4["Layer 4 — Attribution & verification rules"]
@@ -53,7 +53,7 @@ flowchart TD
 
   subgraph L5["Layer 5 — Adjudication & review"]
     L5a["Set-vs-set agreement (same count, same per-burden labels)<br/>burden-matching across differing sets = undefined"]:::open
-    L5b["Review queue — typed reasons across 4 axes (category/polarity/capacity/actor)<br/>queue taxonomy undefined"]:::open
+    L5b["Review queue — SCHEMA (two label-record fields), NOT tooling; DECIDED-UNBUILT (G21)<br/>review_reason: model_disagreement / hybrid_actor / ambiguous_leaf / cat6_category / polarity_review /<br/>orphan_escalation / context_term (+ low_confidence, PRODUCTION only)<br/>feeds@resolution → registry / rubric_example / unit_rule_evidence / training_data / definitions<br/>lanes = sort by review_reason (no queue tooling built); same schema serves both phases"]:::design
     L5c["Human lead adjudicates disagreements against the rubric"]:::design
     L5d["Label store / version-control (established before any real label)"]:::design
   end
@@ -62,7 +62,7 @@ flowchart TD
 
   SPINE["COUNTING SPINE (consumes L2-L4)<br/>burden-count per candidate + grouping across candidates<br/>cross-instrument dedup (no policy) · body↔schedule join (none)<br/>→ headline total + economic FLOOR (economic-only; both/either own line)"]:::open
 
-  BERT["Legal-BERT — production classifier (trained from L5 labels; runs full corpus)<br/>cannot emit per-section multiplicity → open architecture question"]:::design
+  BERT["Legal-BERT — production classifier (trained from L5 labels; runs full corpus)<br/>PRODUCTION mode: confidence-thresholded review — low_confidence routes to review where disagreement did in training;<br/>rules-layer lanes (unlisted-body / orphan / context-term) + the random audit slice run UNCHANGED through both phases<br/>cannot emit per-section multiplicity → open architecture question (G11); requires usable confidence outputs (G9)"]:::design
 
   %% ---- main flow ----
   L0 --> L1

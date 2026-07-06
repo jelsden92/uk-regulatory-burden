@@ -45,7 +45,7 @@ flowchart TD
   PB["FOR EACH burden unit → N6..N10"]:::design
 
   PB --> N6
-  N6["N6  CATEGORY 1-6<br/>rule: §2 six categories; Cat2-vs-Cat5 trigger-control; DEFENCE-DOMINANCE → IB/IBA (notes item 7); Cat6→review<br/>exec: L3 dual-model (Claude+Gemini) → L5 human on disagreement<br/>status: DESIGN (defence-dominance = new simplification, pilot-contingent)"]:::design
+  N6["N6  CATEGORY 1-6<br/>rule: §2 six categories; Cat2-vs-Cat5 trigger-control; DEFENCE-DOMINANCE → IB/IBA (notes item 7); Cat6→review<br/>exec: L3 dual-model (Claude+Gemini) → L5 human on disagreement — TRAINING-DATA phase;<br/>production = Legal-BERT + confidence-thresholded review (low_confidence routes where disagreement did)<br/>status: DESIGN (defence-dominance = new simplification, pilot-contingent)"]:::design
   N6 -->|Cat 6 ambiguous| REVIEW
   N6 -->|category assigned| N7
 
@@ -65,7 +65,7 @@ flowchart TD
   EMIT["EMIT BURDEN {category, polarity, obligated_party, actor_capacity, provenance, orphan?}<br/>exec: L5 label store · status: OPEN (label store / version-control not built)"]:::open
   EMIT --> SPINE
 
-  REVIEW["ROUTE TO REVIEW (Layer 5) — 4 axes converge:<br/>hybrid-actor / ambiguous-leaf / Cat6 / polarity-review / model-disagreement<br/>exec: L5 human · status: OPEN (queue taxonomy + set-vs-set burden-matching undefined)"]:::open
+  REVIEW["ROUTE TO REVIEW (Layer 5) — SCHEMA, not queue tooling<br/>review_reason (primary = first route to fire in tree order; optional secondary for compound cases):<br/>model_disagreement / hybrid_actor / ambiguous_leaf / cat6_category / polarity_review / orphan_escalation / context_term<br/>(+ low_confidence — PRODUCTION phase only); feeds@resolution ∈ {registry, rubric_example, unit_rule_evidence, training_data, definitions}<br/>lanes = sort records by review_reason; gating lanes first (disagreement blocks training_data, hybrid blocks registry, ambiguous_leaf feeds unit-rule test), rest pool<br/>PHASE: dual-model disagreement = training-data-phase signal; production = Legal-BERT confidence-threshold (same schema, different traffic mix)<br/>exec: L5 label store · status: DECIDED-UNBUILT (schema ratified; fields unbuilt pending label store) · → gaps G21<br/>NB set-vs-set burden-matching mechanics stay OPEN — the Layer-3 architecture question (→ gaps G20, allocation agenda)"]:::design
 
   SPINE["COUNTING SPINE: burden-count per candidate + grouping across candidates<br/>+ cross-instrument dedup (no policy; vs intentional devolution dupes) + body↔schedule join (none)<br/>→ headline total + economic FLOOR (economic-only; both/either own line)<br/>status: OPEN"]:::open
 

@@ -1,6 +1,6 @@
 # Decision-Tree Gap List — agenda for the stage-2 design session
 
-**Date:** 2026-07-05 · **Status:** mapping exercise; **triage in progress (2026-07-06)** — as rules are ratified, entries flip `OPEN → DECIDED-UNBUILT` and the residual (executor/impl) moves to the stage-2 agenda. Reclassified so far: **G1, G5** (rule settled, executor-allocation only); **G25** (orphan-triage lane ratified); **G2** (typed-exclusion schema ratified). Further items pending.
+**Date:** 2026-07-05 · **Status:** mapping exercise; **triage in progress (2026-07-06)** — as rules are ratified, entries flip `OPEN → DECIDED-UNBUILT` and the residual (executor/impl) moves to the stage-2 agenda. Reclassified so far: **G1, G5** (rule settled, executor-allocation only); **G25** (orphan-triage lane ratified); **G2** (typed-exclusion schema ratified); **G21** (review-queue taxonomy ratified as schema). Further items pending.
 **Companions:** `pipeline_architecture.mmd` (systems view), `candidate_decision_tree.mmd` (logic view).
 **Method:** every decision node in the per-candidate tree was annotated `rule · executor · status`; this is the flat list of every node where the **rule is missing/vague**, the **executor is unallocated**, or the **required data/implementation does not exist**. Each entry says *what is missing* and *what kind of decision closes it* — it does **not** propose the answer.
 
@@ -32,7 +32,7 @@
 | G18 | spine dedup | cross-instrument dedup policy does not exist | ARCH+RUBRIC | OPEN ✦ |
 | G19 | spine join | body↔schedule / amend↔target join does not exist | ARCH+IMPL | OPEN ✦ |
 | G20 | L5 set-vs-set | no burden-matching rule when model counts differ | ARCH+RUBRIC | OPEN ★ |
-| G21 | L5 review queue | queue taxonomy / adjudication schema undefined | ARCH | OPEN ★ |
+| G21 | L5 review queue | RATIFIED as SCHEMA (review_reason + feeds fields), not tooling; fields unbuilt pending label store | IMPL | DESIGN ★ |
 | G22 | L5 label store | label store / version-control unbuilt (blocks all) | IMPL | DESIGN |
 | G23 | BERT inference | no auto-accept-vs-review confidence policy | ARCH | OPEN ★ |
 | G24 | L1 recall gate | recall ceiling = word_list union (silent FN) | LIST+IMPL | OPEN |
@@ -82,7 +82,7 @@ The §5C function test needs a canonical list of statutory bodies (FSCS, FOS, re
 ## Decomposition & the unit of count (Layer 3 / counting spine)
 
 **G9 — Decomposition executor = the Layer-3 architecture question.** `[N5 · ARCH · OPEN ✦]`
-How a section becomes N burden units — per-candidate classifier, counting head, BIO/span tagging, or decompose-then-classify — is the single decision that fixes both the labelling I/O contract and the production-model shape. Formally deferred to stage-2 (rubric §7 item 1, notes item 6). *Closes with:* the stage-2 architecture choice (ARCH).
+How a section becomes N burden units — per-candidate classifier, counting head, BIO/span tagging, or decompose-then-classify — is the single decision that fixes both the labelling I/O contract and the production-model shape. Formally deferred to stage-2 (rubric §7 item 1, notes item 6). **Selection criterion:** the chosen architecture must emit **usable confidence outputs** — production review depends on confidence-thresholding *replacing* disagreement as the model-side uncertainty signal (G21, G23), and the four candidate architectures differ in how naturally they provide it. *Closes with:* the stage-2 architecture choice (ARCH).
 
 **G10 — Burden-vs-condition discriminator not empirically tested.** `[N5 · RUBRIC · OPEN]`
 The unit rule's core call — obligation-leaf (count each) vs condition/factor-leaf (count once) — is defined but not yet run against real chapeau-plus-list provisions from the corpus (§7 item 3). Until tested, the two models will diverge on multiplicity. *Closes with:* a validation pass and any resulting rule tightening (RUBRIC).
@@ -123,8 +123,14 @@ A burden's operative clause and its schedule detail — or an amending Act's ins
 **G20 — Set-vs-set agreement has no burden-matching rule.** `[L5 · ARCH+RUBRIC · OPEN ★]`
 Agreement is defined for the equal-count/equal-label case. When Claude and Gemini emit *different burden counts* for one section, there is no rule to align the two burden-sets, score partial agreement, or decide what routes to review. This is the common disagreement mode, not an edge case. *Closes with:* a matching/scoring algorithm (ARCH) and an adjudication rule (RUBRIC).
 
-**G21 — Review-queue taxonomy undefined.** `[L5 · ARCH · OPEN ★]`
-At least five distinct review reasons converge on one queue (hybrid actor, ambiguous leaf, Cat-6, polarity-review, model disagreement) with no typed reason recorded and no adjudication schema capturing *which axis* is unresolved. Without types, the human lead can't triage or measure the queue. *Closes with:* a queue/adjudication schema (ARCH).
+**G21 — Review-queue taxonomy: ratified as SCHEMA (not infrastructure).** `[L5 · IMPL · DECIDED-UNBUILT ★]`
+At least five distinct review reasons converge on one queue with no typed reason recorded. **Ratified design (2026-07-06) — two label-record fields, present from the first pilot adjudication, not a queue tool:**
+- **`review_reason`** — primary (the route that fired **first in tree order**) plus optional **secondary** for compound cases. Values: `model_disagreement`, `hybrid_actor`, `ambiguous_leaf`, `cat6_category`, `polarity_review`, `orphan_escalation`, `context_term` — plus `low_confidence`, **reserved for the production phase** (see phase note below).
+- **`feeds`** — recorded **at resolution**: `registry` | `rubric_example` | `unit_rule_evidence` | `training_data` | `definitions`. This is what makes adjudication harvest **mechanical** — rulings flow to the statutory-bodies registry (G6), the rubric's worked examples, the unit-rule field-test evidence (G10), the training set — rather than archaeological.
+- **No queue tooling is built.** During labelling, *lanes* = sorting records by `review_reason` before an adjudication session; *priority* = one line of guidance (gating lanes first: `model_disagreement` blocks training data, `hybrid_actor` blocks the registry, `ambiguous_leaf` feeds the unit-rule test; the rest pool). Production-era tooling, if any, is a main-run design question that inherits these fields.
+- **Phase note:** the same `review_reason` schema serves both phases with a different traffic mix — dual-model disagreement is the *training-data-phase* model-side uncertainty signal; in production, `low_confidence` (Legal-BERT confidence-threshold) routes to review where disagreement did. The rules-layer lanes (`hybrid_actor`/unlisted-body, `orphan_escalation`, `context_term`) and the random audit slice run through **both** phases unchanged.
+
+*Closes with:* implementing the two fields (IMPL; folds into the label store, G22). **Set-vs-set burden-matching mechanics stay OPEN** — that is the Layer-3 architecture question (G20/G9, allocation agenda), not the taxonomy.
 
 **G22 — Label store / version-control unbuilt.** `[L5 · IMPL · DESIGN]`
 Ratified as "established before any real label is emitted" — the persistence, versioning, and label-provenance layer. It blocks every downstream step (adjudication, training data, BERT). *Closes with:* building it (IMPL).
