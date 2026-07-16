@@ -9,9 +9,9 @@ _Draft  |  Version 14  |  Corpus complete. **Classifier architecture reframed** 
 > EXTRACTION UNIT (2026-07-03 rebuild): The candidate-extraction pipeline was rebuilt to a two-stage design. **The unit is the section/provision, not the sentence.** A DOM-keyed section anchor (outermost P-level for UK sections, EU articles and schedule P-levels, ∪ the innermost numbered `Division`/`Para` for EU recitals and schedule paragraphs) groups each provision and tags it with a `material_type`. **Stage 1** flags a whole section if any recall cue fires anywhere in it, so cue-less enumerated leaves are carried in on their chapeau rather than silently dropped (the earlier per-sentence emission dropped thousands of such leaves; the rebuild recovers them). Because one section can carry several distinct obligations — the unit-of-count rule (§ Decision Rules) governs how many — **Stage 2** (dual-model labelling; ratified design, not yet built) emits a **burden-set per section** with set-vs-set agreement. This does not change *what counts* as a burden; it changes the granularity at which candidates are surfaced and labelled, and closes the enumerated-leaf recall hole.
 
 # 1. Overview and Motivation
-This project creates the first comprehensive measure of the stock and flow of regulatory requirements in UK legislation. The methodology has been validated through ground truth analysis of 40+ Acts using a line-by-line manual classification workbook approach. Version 12 reflects completion of the corpus build phase and formalisation of key methodological decisions including the penalty-as-consequence rule, conditional obligation category, and Status filtering.
+This project creates the first comprehensive measure of the stock and flow of regulatory requirements in UK legislation. The methodology has been validated through ground truth analysis of 40+ Acts using a line-by-line manual classification workbook approach. Version 14 reflects completion of the corpus build phase and formalisation of key methodological decisions including the penalty-as-consequence rule, conditional obligation category, and Status filtering.
 
-> Key contribution: First systematic, independently verifiable measure of prescriptive regulatory burden in UK legislation. Corpus comprises **69,462 fully digitised pieces of in-force UK legislation** — 100 % of the items that legislation.gov.uk currently exposes with substantive machine-readable XML, within a wider National Archives in-force universe of 119,841 catalogued items. Coverage is reported at three nested scopes: 58 % across the full universe, 77 % excluding local & private Acts, 91 % for post-1990 general-application legislation. Six-way classification system. Validated against manually derived ground truth across 40+ Acts.
+> Key contribution: First systematic, independently verifiable measure of prescriptive regulatory burden in UK legislation. Corpus comprises **69,885 fully digitised pieces of in-force UK legislation** — 100 % of the items that legislation.gov.uk currently exposes with substantive machine-readable XML, within a wider National Archives in-force universe of 119,841 catalogued items. Coverage is reported at three nested scopes: 58.3 % across the full universe, 77.8 % excluding local & private Acts, 91.6 % for post-1990 general-application legislation. Six-way classification system. Validated against manually derived ground truth across 40+ Acts.
 
 # 2. Classification System
 
@@ -96,17 +96,17 @@ The corpus is built against the National Archives InForce CSV manifests under a 
 
 | Tier | Description | Items | % of universe |
 | --- | --- | ---: | ---: |
-| **Tier 1 — Fully digitised** | `/data.xml` returns substantive XML with `NumberOfProvisions > 0`; corpus row has `full_text >= 200` chars. **This is the analyser input — the headline corpus figure.** | **69,462** | **58.0 %** |
-| Tier 2 — Retrieved but metadata-only | `/data.xml` returns valid XML with `NumberOfProvisions = 0` (title, year, number, PDF link only), or content stripped at parse time as Prospective/Repealed. Row exists in `legislation.db` with `na_inforce = 1` but no analyser-usable body text. | 15,895 | 13.3 % |
-| Tier 3 — Not digitised at all | `/data.xml` returns HTTP 404. Item is catalogued in the InForce manifest but has no XML or HTML representation on legislation.gov.uk. | 34,484 | 28.8 % |
+| **Tier 1 — Fully digitised** | `/data.xml` returns substantive XML with `NumberOfProvisions > 0`; corpus row has `full_text >= 200` chars. **This is the analyser input — the headline corpus figure.** | **69,885** | **58.3 %** |
+| Tier 2 — Retrieved but metadata-only | `/data.xml` returns valid XML with `NumberOfProvisions = 0` (title, year, number, PDF link only), or content stripped at parse time as Prospective/Repealed. Row exists in `legislation.db` with `na_inforce = 1` but no analyser-usable body text. | 31,407 | 26.2 % |
+| Tier 3 — Not digitised at all | `/data.xml` returns HTTP 404. Item is catalogued in the InForce manifest but has no XML or HTML representation on legislation.gov.uk. | 18,505 | 15.4 % |
 | **Total — In-force universe** | National Archives InForce manifest under the in-force definitional rule | **119,841** | 100.0 % |
 
 | Metric | Value |
 | --- | --- |
-| **Headline corpus figure (Tier 1, analyser input)** | **69,462** |
+| **Headline corpus figure (Tier 1, analyser input)** | **69,885** |
 | In-force universe (National Archives InForce manifests) | 119,841 |
-| `legislation.db` total rows | 218,088 |
-| Rows flagged `na_inforce = 1` | 85,357 |
+| `legislation.db` total rows | 218,089 |
+| Rows flagged `na_inforce = 1` | 85,358 |
 | Year range | 1267 – 2026 |
 | Stream | B (current in-force) with Status filtering |
 | Status elements stripped at parse time | 611,920 Repealed + 27,098 Prospective + 365 other |
@@ -115,13 +115,13 @@ The corpus is built against the National Archives InForce CSV manifests under a 
 
 | Scope | Description | In-force universe | In corpus | Coverage |
 | --- | --- | ---: | ---: | ---: |
-| **A — Full universe** | Every in-force item across all 28 leg_types | 119,841 | 69,462 | **58.0 %** |
-| **B — General application** | Excludes ukla / ukppa / gbppa / eppa / gbla / uklp | 89,548 | 69,272 | **77.4 %** |
-| **C — Post-1990 general application** | Scope B AND year ≥ 1990 | 67,403 | 61,349 | **91.0 %** |
+| **A — Full universe** | Every in-force item across all 28 leg_types | 119,841 | 69,885 | **58.3 %** |
+| **B — General application** | Excludes ukla / ukppa / gbppa / eppa / gbla / uklp | 89,548 | 69,695 | **77.8 %** |
+| **C — Post-1990 general application** | Scope B AND year ≥ 1990 | 67,403 | 61,745 | **91.6 %** |
 
 Full per-type breakdown: [`coverage_table.csv`](coverage_table.csv). Methodology, exhaustion sweep, and structural-gap characterisation: [`coverage_methodology_note.md`](coverage_methodology_note.md).
 
-> CORPUS STATEMENT: The analyser operates on **69,462 fully digitised pieces of in-force UK legislation** — every item from the National Archives InForce manifests that legislation.gov.uk currently exposes with substantive machine-readable XML, after an exhaustion sweep across every retrieval channel (`/data.xml`, `/data.xml?version=enacted`, `/enacted/data.xml`, `/data.xht`, `/data.akn`, `/data.feed`) and a full cross-reference against the legislation.gov.uk Best Collection bulk download. Coverage on the full in-force universe is 58 %; excluding local and private Acts (which apply only to named persons, places, or institutions and do not impose general-application obligations) raises this to 77 %; restricting to post-1990 general-application law raises it to 91 %. The remaining structural gap (Tier 2 metadata-only shells, 15,895; Tier 3 not digitised, 34,484) cannot be brought into the analyser without either further National Archives digitisation or an OCR pipeline against original-print PDFs; neither falls within the methodology of this study.
+> CORPUS STATEMENT: The analyser operates on **69,885 fully digitised pieces of in-force UK legislation** — every item from the National Archives InForce manifests that legislation.gov.uk currently exposes with substantive machine-readable XML, after an exhaustion sweep across every retrieval channel (`/data.xml`, `/data.xml?version=enacted`, `/enacted/data.xml`, `/data.xht`, `/data.akn`, `/data.feed`) and a full cross-reference against the legislation.gov.uk Best Collection bulk download. Coverage on the full in-force universe is 58.3 %; excluding local and private Acts (which apply only to named persons, places, or institutions and do not impose general-application obligations) raises this to 77.8 %; restricting to post-1990 general-application law raises it to 91.6 %. The remaining structural gap (Tier 2 digitised-but-no-analyser-usable-text, 31,407; Tier 3 not digitised, 18,505) cannot be brought into the analyser without either further National Archives digitisation or an OCR pipeline against original-print PDFs; neither falls within the methodology of this study.
 
 # 7. Validation Approach
 
@@ -181,4 +181,4 @@ In May 2026 the National Archives released the *Statutory Powers and Duties Data
 - Freedom of Information Act 2000: NOW IN CORPUS ✅
 - Devolution compliance: parallel E&W and Scotland provisions counted separately — methodologically intentional
 
-*Version 14. Corpus complete: 69,462 fully digitised pieces of in-force UK legislation, within a wider National Archives in-force universe of 119,841 catalogued items. Coverage at three nested scopes: 58 % full universe / 77 % excluding local & private Acts / 91 % post-1990 general application. Classifier architecture reframed: high-recall extraction (`extract_candidates.py`, reading locally-cached bulk XML — revised-current primary / best-collection fallback) → dual-model (Claude + Gemini) labelling against the rubric → human adjudication → Legal-BERT production classifier. Extraction rebuilt (2026-07-03) to a two-stage, section-level design: DOM-keyed section anchor, Stage-1 subtree flagging, assembled chapeau+leaves with no truncation; Stage-2 burden-set-per-section labelling is ratified design, not yet built. Rule-based classifier retired (extraction pipeline survives). trf upgrade, Cat 2/5 rule-based fixes, and the tag migration dropped as obviated. Six-category rubric + polarity. Status filtering. Short act validation workbook. Penalty-as-consequence rule. Conditional split (organic vs external trigger) formalised. Licence-to-operate as Direct burden.*
+*Version 14. Corpus complete: 69,885 fully digitised pieces of in-force UK legislation, within a wider National Archives in-force universe of 119,841 catalogued items. Coverage at three nested scopes: 58.3 % full universe / 77.8 % excluding local & private Acts / 91.6 % post-1990 general application. Classifier architecture reframed: high-recall extraction (`extract_candidates.py`, reading locally-cached bulk XML — revised-current primary / best-collection fallback) → dual-model (Claude + Gemini) labelling against the rubric → human adjudication → Legal-BERT production classifier. Extraction rebuilt (2026-07-03) to a two-stage, section-level design: DOM-keyed section anchor, Stage-1 subtree flagging, assembled chapeau+leaves with no truncation; Stage-2 burden-set-per-section labelling is ratified design, not yet built. Rule-based classifier retired (extraction pipeline survives). trf upgrade, Cat 2/5 rule-based fixes, and the tag migration dropped as obviated. Six-category rubric + polarity. Status filtering. Short act validation workbook. Penalty-as-consequence rule. Conditional split (organic vs external trigger) formalised. Licence-to-operate as Direct burden.*

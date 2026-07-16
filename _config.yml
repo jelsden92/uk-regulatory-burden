@@ -1,8 +1,10 @@
 title: UK Regulatory Burden
 description: >-
-  The first comprehensive measure of prescriptive regulatory burden in UK
-  legislation — a UK equivalent of QuantGov RegData. Corpus complete at
-  212,183 items; methodology validated; results forthcoming.
+  The first comprehensive, validated measure of prescriptive regulatory burden
+  across the UK statute book. Where QuantGov RegData counts restriction words,
+  UKRegBurden counts the burdens themselves — distinct legal obligations and
+  prohibitions, individuated, deduplicated, and classified by who bears them
+  and in what capacity.
 author: Jethro Elsden
 
 # Project Pages theme — clean, professional, mobile-friendly, suitable for a

@@ -73,6 +73,29 @@ Fwd_*.zip
 # --- Diagnostics / investigation scratch (probes, cached XML, verify harnesses) ---
 _diagnostics/
 
+# --- Pilot / test-round working artefacts (NOT for publication) ---
+candidates*.jsonl
+candidates_index.csv
+candidates_dropped_dups.jsonl
+_dryrun*
+_test_round*
+_supplement_round*
+_reserved_labelset_indices.md
+_r3_*
+_sup*
+_ingest_*
+_probe_sweep/
+/coverage_table.csv
+
+# --- TNA dataset extracts, correspondence & reference material (private) ---
+20260330/
+Useful docs/
+_colab_migration/
+_tna_*
+tna_crosscheck_review*
+"draft email to TNA.docx"
+na_*email*
+
 # --- Other ---
 list-of-uk-regulatory-organisations.ods
 duties.zip

@@ -4,7 +4,7 @@
 
 _July 2026  |  Corpus complete. **Architecture reframed: extraction pipeline → dual-model labelling → Legal-BERT.** Extraction rebuilt to a two-stage, section-level design (2026-07-03). Rule-based classifier retired._
 
-> STATUS: Corpus complete (212,183 rows; 98%+ structured XML cached locally). The rule-based classifier is **retired as a classifier** — only its extraction / candidate-filtering pipeline survives. Classification now: a high-recall candidate-extraction pipeline surfaces candidate burden sentences with context; Claude and Gemini independently classify them against the rubric; the human lead adjudicates disagreements; the validated labels train **Legal-BERT**, which is the production classifier that runs the corpus.
+> STATUS: Corpus complete (218,089 rows; 98%+ structured XML cached locally). The rule-based classifier is **retired as a classifier** — only its extraction / candidate-filtering pipeline survives. Classification now: a high-recall candidate-extraction pipeline surfaces candidate burden sentences with context; Claude and Gemini independently classify them against the rubric; the human lead adjudicates disagreements; the validated labels train **Legal-BERT**, which is the production classifier that runs the corpus.
 
 # Architecture (2026-06-14 REFRAME — central change)
 
@@ -31,7 +31,7 @@ The rubric (`uk_reg_validation_rubric_v2_draft.docx`) is the conceptual classifi
 
 # RESOLVED — structured XML is cached locally (no corpus crawl, ever)
 
-The raw structured CLML XML is already on disk in `Bulk download/` — the DB storing only flattened text did not mean the source XML was gone. **~98% of the in-force corpus (68,380 / 69,462) is on disk;** no 69k-item crawl of legislation.gov.uk is required.
+The raw structured CLML XML is already on disk in `Bulk download/` — the DB storing only flattened text did not mean the source XML was gone. **~98% of the in-force corpus (68,380 / 69,885) is on disk;** no 69k-item crawl of legislation.gov.uk is required.
 
 - **Source priority (decisive, per distinct item_url):** revised-current's `revised` variant → best-collection's `revised` variant where RC lacks it → `made`/`enacted` ONLY where no revision exists in either source. This **reversed an earlier "best-collection only" conclusion**: best-collection serves stale *as-made* text for thousands of amended SIs (51,255 corpus SIs are `made`-only in BC; ~5,822 have a revised version only in revised-current, ~27% materially different) and lacks 7 in-force retained-EU items that exist only in revised-current.
 - **Read variant info from the files on disk, not `best_collection_index.json`** — that index is stale on variants and trusting it would reintroduce the stale-text problem.
@@ -75,8 +75,8 @@ Three one-off corpus measurements to run after bulk extraction and before labell
 
 | Metric | Value |
 | --- | --- |
-| Total rows | 212,183 |
-| In-force corpus (na_inforce=1, text≥200) | 69,462 distinct items (zero double-counting) |
+| Total rows | 218,089 |
+| In-force corpus (na_inforce=1, text≥200) | 69,885 distinct items (zero double-counting) |
 | Structured XML cached locally | ~98% of in-force corpus, in `Bulk download/` |
 | uksi coverage | 99.6% (43,272/43,463) |
 | Post-1990 ukpga | 100% — all significant Acts present |

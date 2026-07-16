@@ -212,7 +212,7 @@ Concretely: if you took TNA's data and applied (a) modality=duty filter (b) publ
 
 ### 6c. What should change in methodology or framing now that TNA's dataset exists?
 
-These recommendations are anchored to `project_objective_anchor.md`: the project's core aim is a private-actor-focused, manually-validated, sentence-level measure of regulatory burden. That anchor governs everything below.
+These recommendations are anchored to `project_objective_anchor.md`: the project's core aim is a private-actor-focused, manually-validated, section-anchored (distinct-burden) measure of regulatory burden. That anchor governs everything below.
 
 1. **TNA's dataset is a cross-check validation input, not a substitute for the extraction pipeline.** The project's own corpus → classifier → six-category taxonomy pipeline is what produces the headline measure. TNA's rows are most useful as a *second-opinion attribution* against which our `private_actor` / `public_body` classifications can be cross-referenced — exactly the role formalised in `tna_crosscheck_methodology.md`. Replacing the pipeline with TNA's data would drop the public/private classifier (commitment #1), the penalty-as-consequence rule (§3.1), the offence-as-obligation capture, and the tight conditional-obligation definition (§3.2). All four are distinctive contributions and all four would be lost.
 

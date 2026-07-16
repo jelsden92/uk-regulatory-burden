@@ -14,7 +14,7 @@ _June 2026  |  Version 10 — **Architecture reframed: extraction pipeline → d
 >
 > **QUEUED FOR LATER (corpus-run-time, not now)**: physical `analyser.py` deletion + dependent-script cleanup (currently retired via banner); a variant-aware, priority-resolved local file index; a small *targeted* fetch of the exhaustion-sweep gap-fillers (~1,082 bulk-absent items, one at a time). **STILL RUNNING**: the Colab API-exhaustion sweep.
 >
-> Corpus state (unchanged): 212,183 rows, 69,462 distinct in-force items, 99.6%+ SI coverage, status filtering removing 639,000+ no-force elements. Short-act validation workbook established. Methodological decisions formalised: penalty-as-consequence, the Cat 2 (organic trigger) vs Cat 5 (external-authority trigger) split, evidence supply as part of parent obligation, nested burdens, licence-to-operate as Direct.
+> Corpus state (unchanged): 218,089 rows, 69,885 distinct in-force items, 99.6%+ SI coverage, status filtering removing 639,000+ no-force elements. Short-act validation workbook established. Methodological decisions formalised: penalty-as-consequence, the Cat 2 (organic trigger) vs Cat 5 (external-authority trigger) split, evidence supply as part of parent obligation, nested burdens, licence-to-operate as Direct.
 
 # PART 1 — Novel Contributions
 
@@ -29,7 +29,7 @@ _June 2026  |  Version 10 — **Architecture reframed: extraction pipeline → d
 | Subject classification | Separates private actor from public body |
 | Era-aware drafting conventions | Accounts for 'shall' meaning different things across legislative eras |
 | Short act validation workbook | Line-by-line ground truth with direct/implied/conditional/ambiguous taxonomy |
-| 212,183 item corpus | 99.6%+ modern SI coverage — most comprehensive UK legislative dataset for regulatory analysis |
+| 218,089 item corpus | 99.6%+ modern SI coverage — most comprehensive UK legislative dataset for regulatory analysis |
 
 # PART 2 — Corpus Final State
 
@@ -42,7 +42,7 @@ _June 2026  |  Version 10 — **Architecture reframed: extraction pipeline → d
 | InForce1991 | 2,793 | In force at the 1 Feb 1991 *Statutes in Force* base date (the foundation of the Statute Law Database); 6,892 such items in the universe, 2,793 ingested here |
 | JurisdictionLimited | 2,931 | Items in force in some jurisdictions only |
 | Retry sweep | 546 | Partial recovery of network failures |
-| Total | 212,183 | 99.6%+ modern SIs; 100% post-1990 Acts |
+| Total | 218,089 | 99.6%+ modern SIs; 100% post-1990 Acts |
 
 # PART 3 — Validation Roadmap
 ## Short Act Manual Validation (current phase)
@@ -97,4 +97,4 @@ The classifier is no longer the rule-based analyser. Pipeline: **high-recall ext
 - Phase 7 — International comparisons
 - Phase 8 — Productivity link
 
-*Version 9 — May 2026. Corpus complete 212,183 rows. Short act validation workbook. Classifier development next.*
+*Version 9 — May 2026. Corpus complete 218,089 rows. Short act validation workbook. Classifier development next.*

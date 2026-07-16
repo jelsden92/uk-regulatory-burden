@@ -1,9 +1,9 @@
 scope,group,type_code,type_label,in_force_total,in_corpus_with_text,coverage_pct
-Scope A: Full universe,General application,ukpga,UK Public General Acts,4150,3254,78.4
-Scope A: Full universe,General application,asp,Scottish Parliament Acts,358,357,99.7
+Scope A: Full universe,General application,ukpga,UK Public General Acts,4150,3260,78.6
+Scope A: Full universe,General application,asp,Scottish Parliament Acts,358,358,100.0
 Scope A: Full universe,General application,anaw,Senedd Cymru Acts (pre-2020),42,42,100.0
-Scope A: Full universe,General application,asc,Senedd Cymru Acts (2020-),19,18,94.7
-Scope A: Full universe,General application,mwa,National Assembly for Wales Measures,20,19,95.0
+Scope A: Full universe,General application,asc,Senedd Cymru Acts (2020-),19,19,100.0
+Scope A: Full universe,General application,mwa,National Assembly for Wales Measures,20,20,100.0
 Scope A: Full universe,General application,nia,NI Assembly Acts,193,193,100.0
 Scope A: Full universe,General application,apni,NI Parliament Acts,385,213,55.3
 Scope A: Full universe,General application,mnia,Measures of the NI Assembly (1974),2,2,100.0
@@ -13,22 +13,22 @@ Scope A: Full universe,General application,aep,Acts of the English Parliament (p
 Scope A: Full universe,General application,apgb,Acts of Parliament of GB (1707-1800),692,32,4.6
 Scope A: Full universe,General application,aip,Acts of the Irish Parliament (pre-1800),153,9,5.9
 Scope A: Full universe,General application,aosp,Acts of the Old Scottish Parliament (pre-1707),86,65,75.6
-Scope A: Full universe,General application,uksi,UK Statutory Instruments,51076,43249,84.7
-Scope A: Full universe,General application,ssi,Scottish Statutory Instruments,6453,6314,97.8
-Scope A: Full universe,General application,wsi,Welsh Statutory Instruments,3429,3266,95.2
-Scope A: Full universe,General application,nisr,NI Statutory Rules,12479,6631,53.1
+Scope A: Full universe,General application,uksi,UK Statutory Instruments,51076,43394,85.0
+Scope A: Full universe,General application,ssi,Scottish Statutory Instruments,6453,6336,98.2
+Scope A: Full universe,General application,wsi,Welsh Statutory Instruments,3429,3283,95.7
+Scope A: Full universe,General application,nisr,NI Statutory Rules,12479,6761,54.2
 Scope A: Full universe,General application,uksro,UK Statutory Rules & Orders (pre-1948),1146,0,0.0
-Scope A: Full universe,General application,nisro,NI Statutory Rules & Orders (pre-1974),1323,1,0.1
-Scope A: Full universe,General application,eur,Retained EU Regulations,3945,3148,79.8
-Scope A: Full universe,General application,eudn,Retained EU Decisions,2826,1832,64.8
-Scope A: Full universe,Subtotal,,Subtotal — General application,89548,69272,77.4
+Scope A: Full universe,General application,nisro,NI Statutory Rules & Orders (pre-1974),1323,2,0.2
+Scope A: Full universe,General application,eur,Retained EU Regulations,3945,3240,82.1
+Scope A: Full universe,General application,eudn,Retained EU Decisions,2826,1839,65.1
 Scope A: Full universe,Local & private,ukla,UK Local Acts,19409,190,1.0
 Scope A: Full universe,Local & private,ukppa,UK Personal & Private Acts,3839,0,0.0
 Scope A: Full universe,Local & private,gbppa,GB Private Acts (pre-1801),5317,0,0.0
 Scope A: Full universe,Local & private,eppa,English Private Acts (pre-1707),1611,0,0.0
 Scope A: Full universe,Local & private,gbla,GB Local Acts (pre-1801),107,0,0.0
 Scope A: Full universe,Local & private,uklp,UK Local & Personal Acts,11,0,0.0
+Scope A: Full universe,Subtotal,,Subtotal — General application,89548,69695,77.8
 Scope A: Full universe,Subtotal,,Subtotal — Local & private,30294,190,0.6
-Scope A: Full universe,OVERALL,,Total UK legislation in force,119842,69462,58.0
-Scope B: General application only,Subtotal,,Excludes ukla/ukppa/gbppa/eppa/gbla/uklp,89548,69272,77.4
-Scope C: Post-1990 general application,Subtotal,,Scope B AND year >= 1990,67403,61349,91.0
+Scope A: Full universe,OVERALL,,Total UK legislation in force,119841,69885,58.3
+Scope B: General application only,Subtotal,,Excludes ukla/ukppa/gbppa/eppa/gbla/uklp,89548,69695,77.8
+Scope C: Post-1990 general application,Subtotal,,Scope B AND year >= 1990,67403,61745,91.6
