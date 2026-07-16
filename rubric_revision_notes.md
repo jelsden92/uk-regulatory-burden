@@ -81,6 +81,12 @@ Three rubric-touching items from the triage that resolved the four "stranger" fi
 
 ---
 
+## Batched for the next revision (from 2026-07-15 — round-3 / v2.6 follow-up)
+
+**13. FSMA proxy consistency — one statutory home per rule-layer.** The comply-with-rulebook frontier proxy (rubric §3) has **ONE statutory home per rule-layer** and is counted **once, there** — never re-counted at each rule-mandating section. For the FCA Handbook the home is the **s.137A general-rule-making-and-enforcement complex**; when FSMA 2000 is labelled, do NOT re-count the proxy at every "the FCA must make rules…" provision (FSMA has dozens of them — round-3 extraction surfaced ~20+ rule-making sections). Guards against the frontier proxy inflating the FSMA burden count by re-counting at each rule-mandating section. (Not a v2.6 rubric edit — a labelling-convention note for when FSMA is worked.)
+
+---
+
 ## Route elsewhere — NOT a rubric edit
 
 **→ `project_decision_log.docx` ("The recurring patterns" section) — a new named pattern.**
