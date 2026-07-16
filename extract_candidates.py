@@ -249,17 +249,30 @@ def _defs_in(sentence, defs):
 
 
 # ---------------------------------------------------------------------------
-# Section anchoring — the RATIFIED two-stage unit (see project_decision_log)
+# Section anchoring — the RATIFIED three-tier unit (see project_decision_log 2026-07-16)
 # ---------------------------------------------------------------------------
-# Section = outermost P-level (UK section / EU article / schedule P-level) UNION
+# Tier 1: outermost P-level (UK section / EU article / schedule P-level). Tier 2:
 # innermost NUMBERED Division|Para for non-P-level text (EU recitals/paras,
-# schedule paragraphs). Keyed on DOM node identity, NOT section_ref (which is
+# schedule paragraphs). Tier 3 (added 2026-07-16): schedule/annex prose-and-list
+# content and bare-<P> body tail-clauses that fall outside any numbered tree — routed
+# into three NEW material types (uk_schedule_unnumbered / eu_annex / uk_body_tail) so
+# the four tier-1/2 counters stay provably untouched; grain = per-entry (enumerated
+# lists) / whole-form / paragraph-block. Keyed on DOM node identity, NOT section_ref (which is
 # non-unique — "24(1)" maps to five distinct provisions in EP Regs). EU nesting
 # grain = innermost numbered unit (one recital/para = one section), matching the
 # UK "one numbered provision = one section" grain. Editorial text excluded.
 _NUM_LEVELS = _P_LEVELS + ['Division', 'Para']
 _SCHED_TAGS = ['Schedule', 'Schedules', 'ScheduleBody']
 _EDITORIAL = ('Commentary', 'Commentaries', 'Footnote', 'Footnotes', 'MultilineTitle')
+
+# Tier-3 anchor (ratified 2026-07-16): schedule/annex prose-and-list content and bare-<P>
+# body tail-clauses get real anchors in three NEW material types, so the four documented
+# tier-1/2 counters (uk_body/uk_schedule/eu_article/eu_recital) are provably untouched.
+_TIER3_TYPES = ('uk_schedule_unnumbered', 'eu_annex', 'uk_body_tail')
+# Genuine prelims/signature editorial: stays excluded from tier-3 anchoring (as now, orphan/flat).
+_PRELIM_EDITORIAL = ('MadeDate', 'ComingIntoForce', 'ComingIntoForcePara', 'Signatory',
+                     'SignedSection', 'EnactingText', 'Prelims', 'PrimaryPrelims',
+                     'SecondaryPrelims', 'EUPrelims', 'EUPreamble', 'Preamble', 'Approval')
 
 
 def _own_number(el):
@@ -273,12 +286,78 @@ def _own_number(el):
     return ''
 
 
-def _section_root(tx):
+def _list_marker(li):
+    """Marker for an OrderedList/UnorderedList ListItem — read from list structure
+    (NumberOverride attr, else same-level position), formatted by the list's Decoration/Type.
+    List numbering lives in list attributes, not a <Number> child (the _own_number blind spot)."""
+    ol = li.find_parent(['OrderedList', 'UnorderedList'])
+    ov = li.get('NumberOverride')
+    if ov:
+        n = ov.strip('()').strip()
+    else:
+        n = str(1 + sum(1 for _ in li.find_previous_siblings('ListItem')))
+    typ = ((ol.get('Type') if ol else '') or 'arabic').lower()
+    if typ.startswith('alpha'):
+        try:
+            n = chr(96 + int(n))               # 1 -> a
+        except ValueError:
+            pass
+    deco = ((ol.get('Decoration') if ol else '') or '').lower()
+    return f'({n})' if 'paren' in deco else n
+
+
+def _own_title(anc):
+    """The container's OWN heading (direct Title, or Title inside its own TitleBlock) — NOT a
+    recursive descendant Title (which would grab a schedule-wide first heading for deep content)."""
+    for src in (anc, anc.find('TitleBlock', recursive=False)):
+        if src is None:
+            continue
+        t = src.find('Title', recursive=False)
+        if t and t.get_text(strip=True):
+            return t.get_text(' ', strip=True)
+    return ''
+
+
+def _tier3_title(el):
+    """Nearest GOVERNING heading above a tier-3 anchor: the closest titled block, falling back
+    to the enclosing Schedule/annex number (e.g. 'ANNEX III', 'FIFTH SCHEDULE') so no ref is empty."""
+    for anc in el.find_parents(['Pblock', 'Division', 'Chapter', 'Part']):
+        t = _own_title(anc)
+        if t:
+            return t
+    for anc in el.find_parents(['Schedule', 'Schedules']):
+        t = _own_title(anc)
+        if t:
+            return t
+        for src in (anc, anc.find('TitleBlock', recursive=False)):
+            if src is None:
+                continue
+            n = src.find('Number', recursive=False)
+            if n and n.get_text(strip=True):
+                return n.get_text(' ', strip=True)
+    return ''
+
+
+def _tier3_ref_heading(el):
+    """(section_ref, heading) for a tier-3 anchor. Enumerated list entries get a real
+    list ref ('FIFTH SCHEDULE para (3)' / 'ANNEX I item 2'); blocks/forms get the block title."""
+    title = _tier3_title(el)
+    if el.name == 'ListItem':
+        word = 'item' if title.upper().startswith('ANNEX') else 'para'
+        marker = _list_marker(el)
+        ref = f'{title} {word} {marker}'.strip() if title else marker
+        return ref, title
+    return title, title
+
+
+def _section_root(tx, is_eu=False):
     """(section_element, material_type) for a Text node, or (None, None) for
-    genuinely non-sectioned text (the flat-fallback case)."""
+    genuinely non-sectioned text. Tiers 1-2 are UNCHANGED; tier 3 (new) fires only
+    when tiers 1-2 return (None, None) and routes into the three new material types."""
     plevels = tx.find_parents(_P_LEVELS)
     in_sched = tx.find_parent(_SCHED_TAGS) is not None
     in_eubody = tx.find_parent('EUBody') is not None
+    # --- Tier 1 (unchanged) ---
     if plevels:
         root = plevels[-1]                     # outermost P-level = section/article
         if in_sched:
@@ -286,9 +365,43 @@ def _section_root(tx):
         if in_eubody:
             return root, 'eu_article'
         return root, 'uk_body'
+    # --- Tier 2 (unchanged) ---
     for a in tx.find_parents(['Division', 'Para']):   # innermost numbered unit
         if _own_number(a):
             return (a, 'uk_schedule') if in_sched else (a, 'eu_recital')
+    # --- Tier 3 (NEW) — genuinely outside any numbered tree ---
+    if tx.find_parent(_PRELIM_EDITORIAL):
+        return None, None                      # editorial prelims/preamble stay excluded (as now)
+    if is_eu:
+        # EU annex material (annexes map onto Schedule/Division; preamble already excluded above).
+        lis = tx.find_parents('ListItem')
+        if lis:
+            return lis[-1], 'eu_annex'         # outermost list entry — per-entry grain
+        blk = tx.find_parent('Pblock') or tx.find_parent(['P', 'BlockText'])
+        if blk:
+            return blk, 'eu_annex'             # paragraph-block grain
+        div = tx.find_parent(['Division', 'Schedule', 'Part'])
+        if div:
+            return div, 'eu_annex'             # last-resort whole-division/annex
+        return None, None
+    if in_sched:
+        lis = tx.find_parents('ListItem')
+        if lis:
+            return lis[-1], 'uk_schedule_unnumbered'   # outermost list entry — per-entry grain
+        pb = tx.find_parent('Pblock')
+        if pb:
+            return pb, 'uk_schedule_unnumbered'        # paragraph-block / whole-form grain
+        pp = tx.find_parent(['P', 'BlockText'])
+        if pp:
+            return pp, 'uk_schedule_unnumbered'
+        sp = tx.find_parent(['Part', 'Schedule'])
+        if sp:
+            return sp, 'uk_schedule_unnumbered'        # last-resort whole-Part/Schedule
+        return None, None
+    # main body bare-<P> tail-clause (e.g. Explosives 1875 extent clauses)
+    pb = tx.find_parent('Pblock') or tx.find_parent('P')
+    if pb:
+        return pb, 'uk_body_tail'
     return None, None
 
 
@@ -342,6 +455,7 @@ def extract_from_xml(xml_text, item_url, title, year, leg_type):
 
     records, seen_hashes, dropped_dups = [], set(), []
     item_slug = item_url.rstrip('/').split('/')[-1]
+    is_eu = leg_type in ('eur', 'eudn')
 
     # Group Text nodes into sections by DOM identity, in document order.
     sections = collections.OrderedDict()          # id(el) -> {el, material, texts}
@@ -351,7 +465,7 @@ def extract_from_xml(xml_text, item_url, title, year, leg_type):
             continue
         if any(tx.find_parent(x) for x in _EDITORIAL):
             continue
-        root, material = _section_root(tx)
+        root, material = _section_root(tx, is_eu)
         if root is None:
             orphan_texts.append(tx)
             continue
@@ -381,8 +495,11 @@ def extract_from_xml(xml_text, item_url, title, year, leg_type):
             continue
         seen_hashes.add(h)
         first = texts[0]
-        ref = _own_number(el) or _ref_for(first)
-        heading = _heading_for(first)
+        if material in _TIER3_TYPES:
+            ref, heading = _tier3_ref_heading(el)
+        else:
+            ref = _own_number(el) or _ref_for(first)
+            heading = _heading_for(first)
         quality = 'full' if (ref or heading) else 'partial'
         in_amend = _in_amendment(el) or any(_in_amendment(t) for t in texts)
         records.append({
@@ -395,7 +512,8 @@ def extract_from_xml(xml_text, item_url, title, year, leg_type):
             'section_ref': ref, 'heading': heading,
             'text': assembled,                    # FULL assembled block — no truncation
             'n_leaves': len(leaves), 'leaves': leaves,
-            'is_in_schedule': material == 'uk_schedule', 'is_amendment_insertion': in_amend,
+            'is_in_schedule': material in ('uk_schedule', 'uk_schedule_unnumbered', 'eu_annex'),
+            'is_amendment_insertion': in_amend,
             'candidate_cue': cues, 'hints': hints,
             'definitions': _defs_in(assembled, defs),
             'context_quality': quality,

@@ -70,6 +70,9 @@ create_notebook.py
 *.eml
 Fwd_*.zip
 
+# --- Diagnostics / investigation scratch (probes, cached XML, verify harnesses) ---
+_diagnostics/
+
 # --- Other ---
 list-of-uk-regulatory-organisations.ods
 duties.zip
