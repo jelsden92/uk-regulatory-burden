@@ -255,9 +255,10 @@ def _defs_in(sentence, defs):
 # innermost NUMBERED Division|Para for non-P-level text (EU recitals/paras,
 # schedule paragraphs). Tier 3 (added 2026-07-16): schedule/annex prose-and-list
 # content and bare-<P> body tail-clauses that fall outside any numbered tree — routed
-# into three NEW material types (uk_schedule_unnumbered / eu_annex / uk_body_tail) so
-# the four tier-1/2 counters stay provably untouched; grain = per-entry (enumerated
-# lists) / whole-form / paragraph-block. Keyed on DOM node identity, NOT section_ref (which is
+# into three NEW material types (uk_schedule_unnumbered / eu_annex / uk_body_tail);
+# grain = per-entry (enumerated lists) / whole-form / paragraph-block. Taxonomy semantics
+# v2 (2026-07-16): types describe CONTENT — EU-family Schedule-mapped content is eu_annex at
+# every tier (not just tier-3). Keyed on DOM node identity, NOT section_ref (which is
 # non-unique — "24(1)" maps to five distinct provisions in EP Regs). EU nesting
 # grain = innermost numbered unit (one recital/para = one section), matching the
 # UK "one numbered provision = one section" grain. Editorial text excluded.
@@ -351,58 +352,66 @@ def _tier3_ref_heading(el):
 
 
 def _section_root(tx, is_eu=False):
-    """(section_element, material_type) for a Text node, or (None, None) for
-    genuinely non-sectioned text. Tiers 1-2 are UNCHANGED; tier 3 (new) fires only
-    when tiers 1-2 return (None, None) and routes into the three new material types."""
+    """(section_element, material_type, is_tier3) for a Text node, or (None, None, False)
+    for genuinely non-sectioned text. `is_tier3` marks anchors found by the tier-3 fallback,
+    so ref/heading keys on the ANCHOR TIER, not on material_type (semantics v2 decoupling:
+    eu_annex now spans tiers 1-2 numbered annexes AND tier-3 unnumbered annex prose, but only
+    the latter uses _tier3_ref_heading). Anchoring/grain unchanged from the tier-3 build."""
     plevels = tx.find_parents(_P_LEVELS)
     in_sched = tx.find_parent(_SCHED_TAGS) is not None
     in_eubody = tx.find_parent('EUBody') is not None
-    # --- Tier 1 (unchanged) ---
+    # Taxonomy semantics v2 (2026-07-16): material_type describes CONTENT, not anchoring history.
+    # Schedule-mapped content in EU-family instruments is eu_annex at EVERY tier (legislation.gov.uk
+    # maps EU annexes onto Schedule; pre-checked: all EU-family Schedule content is annex, no
+    # protocols/appendices). Anchor element, grain, boundaries, refs and headings are unchanged —
+    # this is a type LABEL delta only.
+    sched_mat = 'eu_annex' if is_eu else 'uk_schedule'
+    # --- Tier 1 ---
     if plevels:
         root = plevels[-1]                     # outermost P-level = section/article
         if in_sched:
-            return root, 'uk_schedule'
+            return root, sched_mat, False
         if in_eubody:
-            return root, 'eu_article'
-        return root, 'uk_body'
-    # --- Tier 2 (unchanged) ---
+            return root, 'eu_article', False
+        return root, 'uk_body', False
+    # --- Tier 2 ---
     for a in tx.find_parents(['Division', 'Para']):   # innermost numbered unit
         if _own_number(a):
-            return (a, 'uk_schedule') if in_sched else (a, 'eu_recital')
+            return (a, sched_mat, False) if in_sched else (a, 'eu_recital', False)
     # --- Tier 3 (NEW) — genuinely outside any numbered tree ---
     if tx.find_parent(_PRELIM_EDITORIAL):
-        return None, None                      # editorial prelims/preamble stay excluded (as now)
+        return None, None, False               # editorial prelims/preamble stay excluded (as now)
     if is_eu:
         # EU annex material (annexes map onto Schedule/Division; preamble already excluded above).
         lis = tx.find_parents('ListItem')
         if lis:
-            return lis[-1], 'eu_annex'         # outermost list entry — per-entry grain
+            return lis[-1], 'eu_annex', True   # outermost list entry — per-entry grain
         blk = tx.find_parent('Pblock') or tx.find_parent(['P', 'BlockText'])
         if blk:
-            return blk, 'eu_annex'             # paragraph-block grain
+            return blk, 'eu_annex', True       # paragraph-block grain
         div = tx.find_parent(['Division', 'Schedule', 'Part'])
         if div:
-            return div, 'eu_annex'             # last-resort whole-division/annex
-        return None, None
+            return div, 'eu_annex', True       # last-resort whole-division/annex
+        return None, None, False
     if in_sched:
         lis = tx.find_parents('ListItem')
         if lis:
-            return lis[-1], 'uk_schedule_unnumbered'   # outermost list entry — per-entry grain
+            return lis[-1], 'uk_schedule_unnumbered', True   # outermost list entry — per-entry grain
         pb = tx.find_parent('Pblock')
         if pb:
-            return pb, 'uk_schedule_unnumbered'        # paragraph-block / whole-form grain
+            return pb, 'uk_schedule_unnumbered', True        # paragraph-block / whole-form grain
         pp = tx.find_parent(['P', 'BlockText'])
         if pp:
-            return pp, 'uk_schedule_unnumbered'
+            return pp, 'uk_schedule_unnumbered', True
         sp = tx.find_parent(['Part', 'Schedule'])
         if sp:
-            return sp, 'uk_schedule_unnumbered'        # last-resort whole-Part/Schedule
-        return None, None
+            return sp, 'uk_schedule_unnumbered', True        # last-resort whole-Part/Schedule
+        return None, None, False
     # main body bare-<P> tail-clause (e.g. Explosives 1875 extent clauses)
     pb = tx.find_parent('Pblock') or tx.find_parent('P')
     if pb:
-        return pb, 'uk_body_tail'
-    return None, None
+        return pb, 'uk_body_tail', True
+    return None, None, False
 
 
 def _marker_chain(tx, section_el):
@@ -465,13 +474,13 @@ def extract_from_xml(xml_text, item_url, title, year, leg_type):
             continue
         if any(tx.find_parent(x) for x in _EDITORIAL):
             continue
-        root, material = _section_root(tx, is_eu)
+        root, material, tier3 = _section_root(tx, is_eu)
         if root is None:
             orphan_texts.append(tx)
             continue
         k = id(root)
         if k not in sections:
-            sections[k] = {'el': root, 'material': material, 'texts': []}
+            sections[k] = {'el': root, 'material': material, 'tier3': tier3, 'texts': []}
         sections[k]['texts'].append(tx)
 
     resolved = collections.Counter()
@@ -495,7 +504,7 @@ def extract_from_xml(xml_text, item_url, title, year, leg_type):
             continue
         seen_hashes.add(h)
         first = texts[0]
-        if material in _TIER3_TYPES:
+        if sec['tier3']:                       # ref/heading keys on ANCHOR TIER, not material_type
             ref, heading = _tier3_ref_heading(el)
         else:
             ref = _own_number(el) or _ref_for(first)
