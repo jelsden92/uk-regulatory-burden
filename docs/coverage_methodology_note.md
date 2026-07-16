@@ -116,7 +116,7 @@ Reading the coverage matrix: modern general-application law is near-complete —
 
 ## Definitional rule (in force)
 
-An item from the National Archives InForce CSV manifests was counted as in force if it imposes legal obligations somewhere in the UK at the snapshot date. Operationally:
+An item from the National Archives InForce CSV manifests was counted as in force if it imposes legal obligations or prohibitions somewhere in the UK at the snapshot date. Operationally:
 
 - `InForce`
 - `InForce1991` (in force at the **1 February 1991 base date** of the revised statute book — the date to which *Statutes in Force* had been revised when it was taken as the originating text for the Statute Law Database; not "1991 saving provisions")
@@ -246,7 +246,7 @@ The 49,956-item structural gap (Tier 2 + Tier 3) is dominated by local/private A
 
 ## Why the local and private Acts gap does not materially affect the regulatory burden measure
 
-Local and private Acts apply, by their constitutional nature, to named persons, places, or institutions identified within the Act itself — a particular railway company, named landowners, a specific bridge, a single corporation — and impose no obligations of general application on the public or on regulated entities of a class. Excluding them from the analyser denominator therefore does not reduce the regulatory burden being measured, because they never formed part of the regulatory burden that any UK private actor outside the named subjects could face. This is why Scope B (77.8 %) is the most defensible denominator for general-application regulatory-burden analysis, and Scope C (91.6 %) for modern regulatory-burden analysis.
+Local and private Acts apply, by their constitutional nature, to named persons, places, or institutions identified within the Act itself — a particular railway company, named landowners, a specific bridge, a single corporation — and impose no obligations or prohibitions of general application on the public or on regulated entities of a class. Excluding them from the analyser denominator therefore does not reduce the regulatory burden being measured, because they never formed part of the regulatory burden that any UK private actor outside the named subjects could face. This is why Scope B (77.8 %) is the most defensible denominator for general-application regulatory-burden analysis, and Scope C (91.6 %) for modern regulatory-burden analysis.
 
 ## Regulatory layers beyond the statute book — what is out of measure
 

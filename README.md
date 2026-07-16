@@ -1,6 +1,6 @@
 **The first comprehensive, validated measure of prescriptive regulatory burden across the UK statute book. Where QuantGov RegData counts restriction words, UKRegBurden counts the burdens themselves — distinct legal obligations and prohibitions, individuated, deduplicated, and classified by who bears them and in what capacity.**
 
-This repository contains the corpus-building and candidate-extraction pipeline and the methodology documents for a project that measures the stock and flow of legally binding obligations across the entire body of UK law in force. Results are forthcoming in a separate think-tank publication.
+This repository contains the corpus-building and candidate-extraction pipeline and the methodology documents for a project that measures the stock and flow of legally binding obligations and prohibitions across the entire body of UK law in force. Results are forthcoming in a separate think-tank publication.
 
 ---
 

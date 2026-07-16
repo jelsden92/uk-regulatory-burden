@@ -14,7 +14,7 @@ The **count of legally binding obligations and prohibitions** imposed on private
 
 ## What counts — scope ruling (statutory private-law duties, both sides)
 
-The measure counts **statutory obligations as defined in the rubric, not a pre-sorted "regulation" subset**. A statutory obligation with legal force on a private actor counts whether its parent statute is "regulatory" or private-law, whether it binds the trader or the consumer side, and whether it is a mandatory term or a displaceable default (e.g. CRA 2015 s.25 — the consumer's duty to pay at the contract rate counts).
+The measure counts **statutory obligations and prohibitions as defined in the rubric, not a pre-sorted "regulation" subset**. A statutory obligation or prohibition with legal force on a private actor counts whether its parent statute is "regulatory" or private-law, whether it binds the trader or the consumer side, and whether it is a mandatory term or a displaceable default (e.g. CRA 2015 s.25 — the consumer's duty to pay at the contract rate counts).
 
 **Deeming distinction.** *Interpretive* deeming (labels something for a scheme's purposes — "treated as hazardous for the purposes of any legislation") is excluded. *Substance-creating* deeming (a statutory implied/deemed contract term bringing a live duty between private parties into existence — "every contract is to be treated as including a term that…") is counted and re-attributed to the obligated party (CRA 2015 s.13 → 1 trader burden vs Commission Decision 2000/532 → 0).
 
@@ -71,7 +71,7 @@ Regulation migrates between layers with no net change in burden. The **FSMA 2023
 
 ## Output
 
-A number — **total private actor obligations in UK in-force legislation** — broken down by:
+A number — **total private-actor obligations and prohibitions in UK in-force legislation** — broken down by:
 - **Legislation type** (`ukpga`, `uksi`, `ssi`, `wsi`, `nisr`, `asp`, `nia`, `apni`, `eur`, `eudn`, etc.)
 - **Territorial extent** (England, Wales, Scotland, Northern Ireland, UK-wide; supports the devolution fragmentation analysis)
 - **Subject area** (employment, environment, financial services, consumer protection, criminal law, etc.)
@@ -85,13 +85,13 @@ Plus the **frontier-proxy** line (N duties standing proxy for out-of-measure lay
 
 The headline measure is Phase 1. Subsequent phases extend the framework to:
 - **Regulatory rulebooks** — extending beyond legislation to the prescriptive content of the FCA Handbook, Ofcom rulebooks, PRA Rulebook, etc. This is the archetypal **scope expansion**: those layers are currently *out of measure* (frontier proxies stand in for them), and bringing them in triggers the scope-expansion flip above.
-- **Historical flow analysis** — measuring the rate of obligation addition and removal over time, by Government, by department (keyed on provenance; mind the layer-migration adjustment above).
+- **Historical flow analysis** — measuring the rate of obligation and prohibition addition and removal over time, by Government, by department (keyed on provenance; mind the layer-migration adjustment above).
 - **International comparison** — applying the same methodology to other jurisdictions (US, EU, Commonwealth) to support comparative regulatory-burden analysis.
 
 ## Decision-making rule
 
 When making suggestions about methodology, scope, or technical decisions, ask:
-- Does this advance the count of private-actor obligations?
+- Does this advance the count of private-actor obligations and prohibitions?
 - Does it respect the **public/private filter**, the **six-category taxonomy**, the **manual-validation** requirement, the **unit-of-count (distinct burden) rule**, and the **in/out-of-measure scope boundary**?
 - Does it move the work closer to the headline number, or does it serve a future phase?
 
