@@ -3,8 +3,7 @@ description: >-
   The first comprehensive, validated measure of prescriptive regulatory burden
   across the UK statute book. Where QuantGov RegData counts restriction words,
   UKRegBurden counts the burdens themselves — distinct legal obligations and
-  prohibitions, individuated, deduplicated, and classified by who bears them
-  and in what capacity.
+  prohibitions, classified by who bears them and in what capacity.
 author: Jethro Elsden
 
 # Project Pages theme — clean, professional, mobile-friendly, suitable for a
