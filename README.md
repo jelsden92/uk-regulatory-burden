@@ -9,7 +9,7 @@ This repository contains the corpus-building and candidate-extraction pipeline a
 | Phase | State |
 | --- | --- |
 | Corpus build | **Complete — 69,885 fully digitised pieces of in-force UK legislation**, i.e. 100 % of the items that legislation.gov.uk exposes with substantive machine-readable CLML. This is the extraction input. |
-| Methodology | **v14** — six-category classification + polarity; validated against line-by-line manual ground truth |
+| Methodology | **v14** — six-category classification + polarity; validation rubric developed and stress-tested across 60 real sections spanning five drafting eras; independent dual-LLM labelling pilot with human adjudication next |
 | Pipeline | **Layers 0–1 built and verified** (corpus, sectioning, high-recall candidate extraction); Layers 2–5 designed. **Labelling phase next:** dual independent LLM labelling (Claude + Gemini) against the rubric → human adjudication → a fine-tuned Legal-BERT classifier at corpus scale |
 | Results | **Forthcoming** in a separate think-tank paper |
 
