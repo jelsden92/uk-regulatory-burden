@@ -11,9 +11,9 @@
 
 flowchart TD
 
-  IN["INTAKE: assembled section block + leaves[] + hints (per candidate)<br/>rule: §Extraction unit — one record per flagged section<br/>exec: L1 · status: BUILT"]:::built
+  IN["INTAKE: assembled section block + leaves[] + hints (per candidate)<br/>rule: §Extraction unit — one record per flagged section<br/>anchor THREE-TIER (2026-07-16): T1 P-level · T2 numbered Division/Para · T3 schedule/annex prose+list &amp; body tail-clause<br/>8 material_types (added uk_schedule_unnumbered / eu_annex / uk_body_tail; four legacy counters untouched)<br/>exec: L1 · status: BUILT"]:::built
   RECALL["UPSTREAM GATE: a section with NO cue anywhere is never surfaced<br/>rule: Stage-1 recall gate (word_list union = the ceiling)<br/>exec: L1 · status: OPEN (silent FN risk; only control is recall audit vs ground truth)"]:::open
-  ORPH["ORPHAN TRIAGE LANE: orphan / context_quality=partial candidates (n_leaves=0)<br/>rule: RATIFIED — LLM first-pass CLEARS clearly-non-operative (records typed §4 exclusion, → gaps G2);<br/>verdict ASYMMETRIC (clear only the clearly-non-operative, escalate the rest); triage does NOT label burdens<br/>escalated → enriched with retrievable surrounding raw text → RE-ENTER standard path (N5..N10),<br/>normal dual-model + review; orphan=true carried to the final record (same shape; auditable slice)<br/>exec: UNBUILT (lane) · status: DECIDED-UNBUILT (rule ratified, lane unbuilt) · → gaps G25"]:::design
+  ORPH["ORPHAN TRIAGE LANE: orphan / context_quality=partial candidates (n_leaves=0)<br/>POST tier-3 (G29): old-drafting schedule/annex orphans now anchored — lane handles RESIDUE only<br/>rule: RATIFIED — LLM first-pass CLEARS clearly-non-operative (records typed §4 exclusion, → gaps G2);<br/>verdict ASYMMETRIC (clear only the clearly-non-operative, escalate the rest); triage does NOT label burdens<br/>escalated → enriched with retrievable surrounding raw text → RE-ENTER standard path (N5..N10),<br/>normal dual-model + review; orphan=true carried to the final record (same shape; auditable slice)<br/>exec: UNBUILT (lane) · status: DECIDED-UNBUILT (rule ratified, lane unbuilt) · → gaps G25"]:::design
   IN -.->|precondition| RECALL
   IN -.->|orphan / partial subset| ORPH
   ORPH -->|cleared: non-operative| X_NOP

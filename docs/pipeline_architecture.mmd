@@ -21,7 +21,7 @@ flowchart TD
   end
 
   subgraph L1["Layer 1 — Sectioning / extraction / Stage-1 flagging"]
-    L1a["extract_candidates.py: DOM-keyed section anchor<br/>outermost P-level UNION innermost numbered Division/Para<br/>material_type = uk_body/uk_schedule/eu_article/eu_recital/orphan"]:::built
+    L1a["extract_candidates.py: DOM-keyed section anchor — THREE-TIER (2026-07-16)<br/>T1 outermost P-level · T2 innermost numbered Division/Para · T3 schedule/annex prose+list &amp; body tail-clause<br/>grain: per-entry (enumerated) / whole-form / paragraph-block<br/>8 material_types: uk_body/uk_schedule/eu_article/eu_recital + uk_schedule_unnumbered/eu_annex/uk_body_tail + orphan"]:::built
     L1b["Assemble chapeau + leaves[] (markers preserved, NO truncation)<br/>attach heading / section_ref / definitions / context_quality"]:::built
     L1c["Stage-1 recall gate: flag section if ≥1 cue fires in subtree<br/>(word_list union; high-recall, never drops)"]:::built
     L1d["HINTS only (non-blocking): candidate_cue, is_in_schedule,<br/>is_amendment_insertion, hint_flags"]:::built
@@ -58,7 +58,7 @@ flowchart TD
     L5d["Label store / version-control (established before any real label)"]:::design
   end
 
-  ORPHLANE["Orphan triage lane (material_type='orphan'; n_leaves=0; context_quality=partial)<br/>LLM first-pass CLEARS clearly-non-operative → typed exclusion (exclusion_family/subclass; L5d, G2);<br/>ASYMMETRIC — escalate the rest; escalated → enriched w/ retrievable raw text → RE-ENTER L3 standard path<br/>orphan=true carried to the final record (same shape, no parallel pipeline; auditable slice)<br/>RATIFIED rule, lane UNBUILT"]:::design
+  ORPHLANE["Orphan triage lane (material_type='orphan'; n_leaves=0; context_quality=partial)<br/>POST tier-3 (2026-07-16): old-drafting schedule/annex orphans now anchored → lane handles RESIDUE only<br/>LLM first-pass CLEARS clearly-non-operative → typed exclusion (exclusion_family/subclass; L5d, G2);<br/>ASYMMETRIC — escalate the rest; escalated → enriched w/ retrievable raw text → RE-ENTER L3 standard path<br/>orphan=true carried to the final record (same shape, no parallel pipeline; auditable slice)<br/>RATIFIED rule, lane UNBUILT"]:::design
 
   SPINE["COUNTING SPINE (consumes L2-L4)<br/>burden-count per candidate + grouping across candidates<br/>PRIMARY count = residence-based (parallel instruments = separate burdens; NO dedup on the spine, G18)<br/>duplicate-family lens = separate enrichment (nullable family_id; uniform/divergent), post-labelling · body↔schedule join (none, G19)<br/>→ headline total + economic FLOOR (economic-only; both/either own line)"]:::open
 
