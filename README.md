@@ -9,7 +9,7 @@ This repository contains the corpus-building and candidate-extraction pipeline a
 | Phase | State |
 | --- | --- |
 | Corpus build | **Complete — 69,885 fully digitised pieces of in-force UK legislation**, i.e. 100 % of the items that legislation.gov.uk exposes with substantive machine-readable CLML. This is the extraction input. |
-| Methodology | **v14** — six-category classification + polarity; validation rubric developed and stress-tested across 60 real sections spanning five drafting eras; independent dual-LLM labelling pilot with human adjudication next |
+| Methodology | **v14** — six-category classification + polarity; validation rubric **v1.0 (signed off, published)**, stress-tested across 60 real sections spanning five drafting eras; independent dual-LLM labelling pilot with human adjudication next |
 | Pipeline | **Layers 0–1 built and verified** (corpus, sectioning, high-recall candidate extraction); Layers 2–5 designed. **Labelling phase next:** dual independent LLM labelling (Claude + Gemini) against the rubric → human adjudication → a fine-tuned Legal-BERT classifier at corpus scale |
 | Results | **Forthcoming** in a separate think-tank paper |
 
@@ -39,7 +39,7 @@ Existing UK regulatory-burden estimates count pages, words, or statutory instrum
 
 **Headline counting principles.** The measure is a *curated count*, not a term-frequency proxy: **count at source** (each burden once, at the provision that imposes it — not where it is referenced, penalised, or amended); a **unit rule** distinguishing distinct burdens from conditions/particulars of one burden; **amendment provenance** (textual amendments are machinery, counted at the consolidated target); **frontier proxies** (a statutory duty to comply with an out-of-measure instrument — a permit, byelaw, or regulator rulebook — is counted once as a proxy for that invisible layer); and **typed exclusions** (non-operative candidates are recorded, not silently dropped). Scope, capacity, and the layer boundary are fixed in [`project_objective_anchor.md`](project_objective_anchor.md).
 
-The full validation rubric (v1.0) will be published following the labelling pilot; the rule text is not final until then.
+The full validation rubric — the burden definition, the six categories + polarity, and the decision rules the labelling pilot classifies against — is published at [`docs/validation_rubric.md`](docs/validation_rubric.md) (v1.0, authoritative following the project lead's sign-off read).
 
 Full methodology: [`docs/methodology.md`](docs/methodology.md). Research agenda: [`docs/research_agenda.md`](docs/research_agenda.md). Implementation plan and stage-2 design: [`docs/implementation_plan.md`](docs/implementation_plan.md), [`docs/decision_tree_gaps.md`](docs/decision_tree_gaps.md).
 
@@ -75,6 +75,7 @@ The classifier was reframed (2026-06-14) from a rule-based analyser to a layered
 | `category_mapping.md` | Canonical numeric category IDs ↔ presentational names |
 | `project_objective_anchor.md` | The project anchor — objective + scope (what is counted, and the in/out-of-measure layer boundary) |
 | `docs/methodology.md` | Full methodology specification (v14) |
+| `docs/validation_rubric.md` | **The validation rubric (v1.0)** — burden definition, six categories + polarity, and the decision rules the labelling pilot classifies against |
 | `docs/coverage_methodology_note.md` | Coverage methodology: definitional rule, exhaustion sweep, structural-gap analysis, out-of-measure scope disclosure |
 | `docs/coverage_table.csv` | Per-type coverage table (in-force universe / in corpus / coverage %) |
 | `docs/implementation_plan.md` | Implementation plan, pipeline layers, schema notes, corpus state (v15) |
@@ -87,7 +88,7 @@ The classifier was reframed (2026-06-14) from a rule-based analyser to a layered
 | `LICENSE` | MIT licence covering the source code |
 | `LICENSE-docs` | CC-BY-4.0 covering methodology documents and the corpus manifest |
 
-The **validation rubric** is **not published in this repository** — it is a working draft under the project lead's sign-off read and will be published at v1.0 following the labelling pilot.
+The **validation rubric (v1.0)** is published as [`docs/validation_rubric.md`](docs/validation_rubric.md) — authoritative following the project lead's sign-off read (2026-07-17). The editable master document is maintained separately and not redistributed; the published markdown is the canonical public copy.
 
 ---
 
