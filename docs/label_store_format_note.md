@@ -103,6 +103,19 @@ One record per span of the section that carries **no countable private-actor bur
 Dual-model exclusion agreement is computed on **`exclusion_family` only**; sub-class
 mismatches within an agreed family are logged, not adjudicated.
 
+**Exclusion sub-classes** (best-effort; `mixed_other` available in any family). The four
+families are the load-bearing joint (exclusion taxonomy v2, ratified 2026-07-20):
+`structural` = *operative-but-not-a-burden* (distinct from `public_body_or_no_one` =
+*binds-no-one*); `amendment_machinery` sits under `counted_at_source` because the rule is
+count-at-consolidated-target.
+
+| family | sub-classes |
+|---|---|
+| `non_operative` | `deeming`, `definitional`, `machinery_procedural`, `powers_to_make_secondary`, `scheme_machinery`, `list_of_contents` |
+| `counted_at_source` | `cross_reference`, `compliance_hook`, `enabling_power`, `penalty_as_consequence`, `amendment_machinery`, `secondary_offence_reference` |
+| `public_body_or_no_one` | e.g. `public_body_duty`, `regulator_duty`, `no_addressee` |
+| `structural` | `bare_permission`, `scope_eligibility`, `condition_factor_list`, `single_act_specification`, `procedural_right_v_state`, `liability_attribution`, `burden_removal` |
+
 ---
 
 ## 4. Review-routing fields
