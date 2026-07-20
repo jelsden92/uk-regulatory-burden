@@ -104,10 +104,10 @@ Dual-model exclusion agreement is computed on **`exclusion_family` only**; sub-c
 mismatches within an agreed family are logged, not adjudicated.
 
 **Exclusion sub-classes** (best-effort; `mixed_other` available in any family). The four
-families are the load-bearing joint (exclusion taxonomy v2, ratified 2026-07-20):
-`structural` = *operative-but-not-a-burden* (distinct from `public_body_or_no_one` =
-*binds-no-one*); `amendment_machinery` sits under `counted_at_source` because the rule is
-count-at-consolidated-target.
+families are the load-bearing joint (exclusion taxonomy v2, ratified 2026-07-18):
+`structural` = *operative-but-not-a-burden under the counting rules* (a distinct joint from
+`non_operative`, which has no operative content / "binds no one"); `amendment_machinery`
+sits under `counted_at_source` because the rule is count-at-consolidated-target.
 
 | family | sub-classes |
 |---|---|

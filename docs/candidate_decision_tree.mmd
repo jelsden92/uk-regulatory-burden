@@ -26,7 +26,7 @@ flowchart TD
   N1 -->|operative| N2
 
   N2["N2  Operative content is a TEXTUAL AMENDMENT of another instrument?<br/>rule: notes item 4 (amendment = machinery; count at consolidated target) — RATIFIED<br/>exec: UNBUILT (markup-L4? LLM-L3?); is_amendment_insertion BROKEN (0/1,084 — see decision log)<br/>detect at Addition-fragment grain; fix or rename before Stage 2<br/>status: DECIDED-UNBUILT (rule decided, executor unbuilt)"]:::design
-  N2 -->|yes| X_AMD["EXCLUDED · exclusion_family=amendment_machinery — burden counted at target (residence)<br/>exec: UNBUILT (exclusion writer) · status: DECIDED-UNBUILT (typed-exclusion schema ratified, → gaps G2)<br/>residual OPEN: dedup vs target + editorial-backlog zero-count tail (→ gaps G4/G18)"]:::design
+  N2 -->|yes| X_AMD["EXCLUDED · exclusion_family=counted_at_source, subclass=amendment_machinery — burden counted at target (residence)<br/>exec: UNBUILT (exclusion writer) · status: DECIDED-UNBUILT (typed-exclusion schema ratified, → gaps G2; taxonomy v2 2026-07-18)<br/>residual OPEN: dedup vs target + editorial-backlog zero-count tail (→ gaps G4/G18)"]:::design
   N2 -->|no| N3
 
   N3["N3  POINTER / HOOK / CROSS-REFERENCE only? (burden defined elsewhere)<br/>rule: §3 count-at-source family — SETTLED (cross-refs, compliance/contravention hooks, enabling powers,<br/>penalty-as-consequence, offence primary-vs-secondary; several ratified this month)<br/>exec: UNALLOCATED (L2 pattern vs L3 model + referenced-provision resolution — allocation question, → gaps G5)<br/>status: DECIDED-UNBUILT (rule decided, executor unbuilt)"]:::design
