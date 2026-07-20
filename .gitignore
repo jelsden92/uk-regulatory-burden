@@ -80,7 +80,7 @@ candidates_dropped_dups.jsonl
 _dryrun*
 _test_round*
 _supplement_round*
-_reserved_labelset_indices.md
+_reserved_labelset*
 _r3_*
 _sup*
 _ingest_*
@@ -95,6 +95,14 @@ _tna_*
 tna_crosscheck_review*
 "draft email to TNA.docx"
 na_*email*
+
+# --- Label store (THE MOAT — never pushed to any public remote) ---
+# label_store/ is its own local-only git repo (no remote). Belt-and-braces: ignore the
+# directory AND the store filenames in case any ever sit at repo root.
+label_store/
+labels_*.jsonl
+adjudication.jsonl
+gold.jsonl
 
 # --- Other ---
 list-of-uk-regulatory-organisations.ods
