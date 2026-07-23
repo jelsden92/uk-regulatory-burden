@@ -99,4 +99,12 @@ Staged here per the "everything into the notes, batched" instruction; ready to p
 - **Why it recurs here:** a **consolidated-plus-amending corpus** structurally creates multiple homes for one rule. This is the project's **characteristic failure surface** — recognise the next instance by shape, and reach for count-at-source.
 
 ---
+
+## Published / reconciled — pilot adjudication (2026-07-21)
+
+**Rubric v1.1 PUBLISHED** (`docs/validation_rubric.md` + docx master + Pages). Six additions folded from the pilot adjudication: (i) constituted-duties rule (§3, never-zero-a-power-section); (ii) specifications-vs-embedded-duties test (§1, breach-without-attempting); (iii) IB boundary + named-target discipline (§2A/§3, schema gains `source_target`); (iv) compliant-actor test (§3); (v) polarity conventions (§2A, refrain-entirely vs when-doing + per-condition); (vi) capacity note (§1, ambiguous = unresolvable not broad). **No previously-traced counts change.**
+
+**Format-note shape reconciliation — DONE (this was the open nested-vs-flat item).** The label-store record shape is the **FLAT identity form** — top-level `id` / `title` / `section_ref` / `section_index` / `section_key` — exactly as the pilot legs were built, NOT the nested `section{}` of the earlier format-note draft. `docs/label_store_format_note.md` §1 / §1.1 / §7 aligned to the flat shape and the `rubric_version` stamp bumped to v1.1; `source_target` added to the schema. Aligning the note to the built files (rather than re-shaping the data) was the ratified direction.
+
+---
 _This file is the running home for rubric-revision items only (plus, clearly fenced above, anything staged for another destination). Merge the rubric items into §7 / the relevant sections at the next revision, then prune them from here; move the "Route elsewhere" block to its destination and prune it too._

@@ -23,22 +23,25 @@ labeller's pass over one section** (a "record set"). The section is keyed by its
 **typed exclusions**, never as an empty set.
 
 ```
-{ section: {…}, burdens: [ … ], exclusions: [ … ], labeller_id, rubric_version, timestamp }
+{ id, title, section_ref, section_index, section_key, burdens: [ … ], exclusions: [ … ], labeller_id, rubric_version, timestamp }
 ```
+
+**Shape (reconciled v1.1, 2026-07-21):** the identity fields are carried **flat at the top level** of each line — `id`, `title`, `section_ref`, `section_index`, `section_key` — matching the pilot's as-built files, NOT nested under a `section` object. (The earlier draft nested them; the note was aligned to the built shape after the pilot ingest.)
 
 DOM-identity discipline: the **`id`** (and `section_index`) is the authoritative key;
 `section_ref` and every leaf `ref` are **display-only** (they are not unique — e.g.
 `24(1)` maps to five distinct provisions across one instrument, and `17(10)` repeats
 within a single section).
 
-### 1.1 `section` (identity block)
+### 1.1 Identity fields (flat, top-level)
 
 | field | type | notes |
 |---|---|---|
-| `id` | string | DOM identity, authoritative — e.g. `uksi/2016/1154#s30#d1dd6ac5a3e5` |
+| `id` | string | instrument id (leg_type/year/num) — e.g. `uksi/2016/1154` |
 | `title` | string | e.g. `Environmental Permitting (E&W) Regs 2016` |
-| `section_ref` | string | **display only** — e.g. `24`, `Article 30`, `27BA` |
+| `section_ref` | string \| null | **display only** — e.g. `24`, `Article 30`, `27BA`; may be null |
 | `section_index` | int | DOM index within the parent document (identity component) |
+| `section_key` | string | full DOM identity, authoritative — e.g. `uksi/2016/1154#s30#d1dd6ac5a3e5` |
 
 ### 1.2 Record-set stamp (line level)
 
@@ -47,7 +50,7 @@ Every record in the set inherits these; they are stamped once per line.
 | field | type | allowed / notes |
 |---|---|---|
 | `labeller_id` | string | `jethro` \| `claude` \| `gemini` (\| `gold` in `gold.jsonl`; adjudicator id in `adjudication.jsonl`) |
-| `rubric_version` | string | `"v1.0"` |
+| `rubric_version` | string | `"v1.1"` (the rubric of record) |
 | `timestamp` | string | ISO-8601 with UK offset, e.g. `2026-07-20T14:30:00+01:00` |
 
 ---
@@ -200,12 +203,11 @@ gold label.** Leaf indices are the 0-based positions in that section's served `l
 
 ```json
 {
-  "section": {
-    "id": "uksi/2016/1154#s30#d1dd6ac5a3e5",
-    "title": "Environmental Permitting (E&W) Regs 2016",
-    "section_ref": "24",
-    "section_index": 30
-  },
+  "id": "uksi/2016/1154",
+  "title": "Environmental Permitting (E&W) Regs 2016",
+  "section_ref": "24",
+  "section_index": 30,
+  "section_key": "uksi/2016/1154#s30#d1dd6ac5a3e5",
   "burdens": [
     {
       "burden_id": "b1",
@@ -242,7 +244,7 @@ gold label.** Leaf indices are the 0-based positions in that section's served `l
     }
   ],
   "labeller_id": "jethro",
-  "rubric_version": "v1.0",
+  "rubric_version": "v1.1",
   "timestamp": "2026-07-20T14:30:00+01:00"
 }
 ```
