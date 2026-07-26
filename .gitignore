@@ -83,6 +83,7 @@ _supplement_round*
 _reserved_labelset*
 _campaign_spec.md
 _calibration*
+_decision_log*
 _labelling_contract*
 _r3_*
 _sup*
@@ -106,6 +107,12 @@ label_store/
 labels_*.jsonl
 adjudication.jsonl
 gold.jsonl
+
+# --- Operational / moat context — NEVER tracked ---
+# CLAUDE.md is the project knowledge base Claude Code loads from the working tree at session
+# start (git plays no part in that). It holds moat/operational context, so it must never enter
+# git history. Its ONLY durable protection is this rule + the backup_recipe.md file list.
+CLAUDE.md
 
 # --- Other ---
 list-of-uk-regulatory-organisations.ods

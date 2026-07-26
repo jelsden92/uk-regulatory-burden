@@ -20,8 +20,20 @@ Included categories:
 - **Root docs / notes:** `category_mapping.md`, `rubric_revision_notes.md`,
   `project_objective_anchor.md`, `tna_crosscheck_methodology.md`, `tna_dataset_comparison.md`,
   `extraction_verification_report.md`, `README.md`, the `api_exhaustion_*` / `exhaustion_v3_*` notes.
+- **Untracked operational context (git-EXCLUDED — this backup is its ONLY protection):**
+  `CLAUDE.md` (repo root) — the project knowledge base Claude Code loads at session start. It is
+  gitignored as moat/operational context, so it lives only in the working tree and is in NO git
+  history. It MUST be captured in every backup (a whole-tree zip will include it as a normal file;
+  just don't let a git-only export miss it).
 - **Word artefacts:** all `uk_reg_*.docx` version history, `project_decision_log.docx`, the coverage
   and TNA email `.docx`, the rubric drafts.
+- **Auto-memory store (OUTSIDE the repo tree — pull in explicitly):**
+  `C:\Users\jethr\.claude\projects\C--Users-jethr-OneDrive-Documents-OwnProjects-UKRegBurden\memory\`
+  — the Claude Code project memory directory. Since 2026-07-26 it holds only working-preference
+  memories (`MEMORY.md` + `user_*.md` + `feedback_honest_status.md`); the durable project facts were
+  folded into the git-tracked root `CLAUDE.md`. Back up the whole `memory\` folder so the working
+  preferences survive a machine loss (they are not in git). It is not under the repo root, so a
+  whole-tree zip of the repo will miss it — copy it in as its own `memory/` subfolder.
 - **Candidate outputs (CURRENT format only):** `candidates.jsonl`, `candidates_index.csv`,
   `candidates_dropped_dups.jsonl`. These MUST be the section-anchored format (fields `text`,
   `leaves`, `n_leaves`), never the retired per-sentence format (field `sentence`).
